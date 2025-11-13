@@ -1,10 +1,18 @@
 const { where, Op } = require('sequelize');
 const db = require('../models');
 
-const getDoctorsService = () => {
+const getAllDoctorsService = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const doctors = await db.Doctor.findAll({});
+            const doctors = await db.Doctor.findAll({
+                include: [
+                    {
+                        model: db.User,
+                        as: 'user',
+                        attributes: ['name', 'email', 'phone']
+                    }
+                ]
+            });
 
             if (!doctors) {
                 return resolve({
@@ -71,7 +79,7 @@ const getSchedulesService = (userId) => {
             if (!doctor) {
                 return resolve({
                     errCode: 2,
-                    errMessage: 'Test nkha'
+                    errMessage: 'Doctor not found'
                 });
             }
 
@@ -141,9 +149,125 @@ const getSlotsService = (doctorId, date) => {
     });
 };
 
+const getDoctorBySpecialtyService = (specialtyId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const specialty = await db.Specialty.findOne({
+                where: { id: specialtyId }
+            });
+
+            if (!specialty) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Specialty not found'
+                });
+            }
+
+            const doctors = await db.Doctor.findAll({
+                where: { specialtyId: specialtyId },
+                include: [
+                    {
+                        model: db.User,
+                        as: 'user',
+                        attributes: ['name', 'email', 'phone']
+                    }
+                ]
+            });
+
+            if (doctors.length === 0) {
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'Doctor not found'
+                });
+            }
+
+            return resolve({
+                errCode: 0,
+                message: 'Get doctors successful',
+                data: doctors
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const getAppointmentsService = async (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const doctor = await db.Doctor.findOne({
+                where: { userId: userId }
+            });
+
+            if (!doctor) {
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Doctor not found'
+                });
+            }
+
+            const doctorId = doctor.id;
+
+            const appointments = await db.Appointment.findAll({
+                where: { doctorId: doctorId },
+                include: [
+                    {
+                        model: db.Patient,
+                        as: 'patient',
+                        attributes: [
+                            'dob',
+                            'gender',
+                            'ethnicity',
+                            'address',
+                            'insuranceTerm',
+                            'insuranceNumber',
+                            'familyAddress',
+                            'notePMH'
+                        ],
+                        include: [
+                            {
+                                model: db.User,
+                                as: 'user',
+                                attributes: ['name', 'email', 'phone']
+                            }
+                        ]
+                    },
+                    {
+                        model: db.Slot,
+                        as: 'slot',
+                        attributes: ['startTime', 'endTime']
+                    },
+                    {
+                        model: db.Service,
+                        as: 'service',
+                        attributes: ['durationMinutes', 'name', 'price']
+                    }
+                ]
+            });
+
+            if (!appointments) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Appointment not found'
+                });
+            }
+
+            return resolve({
+                errCode: 0,
+                message: 'Get appointments successful',
+                data: appointments
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
 module.exports = {
-    getDoctorsService,
+    getAllDoctorsService,
     getDoctorByIdService,
     getSchedulesService,
-    getSlotsService
+    getSlotsService,
+    getDoctorBySpecialtyService,
+    getAppointmentsService
 };

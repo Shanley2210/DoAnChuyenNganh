@@ -37,6 +37,18 @@ module.exports = {
                 type: Sequelize.DECIMAL,
                 allowNull: true
             },
+            deposited: {
+                type: Sequelize.DECIMAL,
+                allowNull: true
+            },
+            type: {
+                type: Sequelize.STRING,
+                allowNull: true
+            },
+            finalPrice: {
+                type: Sequelize.DECIMAL,
+                allowNull: true
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE

@@ -7,21 +7,36 @@ const verifyToken = async (req, res, next) => {
     const token = tokenHeader && tokenHeader.split(' ')[1];
 
     if (!token) {
-        return res
-            .status(401)
-            .json({ errCode: 401, errMessage: 'No token provided' });
+        return res.status(401).json({
+            errCode: 401,
+            errMessage: 'No token provided'
+        });
     }
 
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) {
             return res.status(403).json({
                 errCode: 403,
-                errMessage: 'Failed to authenticate token'
+                errMessage: 'Invalid or expired token'
             });
         }
 
         try {
-            const user = await db.User.findByPk(decoded.id);
+            const user = await db.User.findOne({
+                where: { id: decoded.id, verify: true },
+                include: [
+                    {
+                        model: db.Role,
+                        as: 'roles',
+                        through: { attributes: [] }
+                    },
+                    {
+                        model: db.Permission,
+                        as: 'permissions',
+                        through: { attributes: [] }
+                    }
+                ]
+            });
 
             if (!user) {
                 return res.status(404).json({
@@ -30,70 +45,99 @@ const verifyToken = async (req, res, next) => {
                 });
             }
 
-            req.user = decoded;
+            req.user = user;
             next();
-        } catch (err) {
-            return res
-                .status(500)
-                .json({ errCode: 500, errMessage: 'Server error' });
+        } catch (e) {
+            console.error('verifyToken error:', e);
+            return res.status(500).json({
+                errCode: 500,
+                errMessage: 'Server error'
+            });
         }
     });
 };
 
-const verifyAdmin = async (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({
-            errCode: 403,
-            errMessage: 'Require admin role'
-        });
-    }
+const verifyRole = (roleName) => {
+    return async (req, res, next) => {
+        try {
+            const hasRole = req.user.roles?.some(
+                (r) => r.name.toLowerCase() === roleName.toLowerCase()
+            );
 
-    next();
-};
+            if (!hasRole) {
+                return res.status(403).json({
+                    errCode: 403,
+                    errMessage: `Access denied: requires role ${roleName}`
+                });
+            }
 
-const verifyDoctor = async (req, res, next) => {
-    if (!req.user || req.user.role !== 'doctor') {
-        return res.status(403).json({
-            errCode: 403,
-            errMessage: 'Require doctor role'
-        });
-    }
-
-    next();
-};
-
-const verifySystemAdmin = async (req, res, next) => {
-    try {
-        if (!req.user || req.user.role !== 'admin') {
-            return res.status(403).json({
-                errCode: 403,
-                errMessage: 'Require admin role'
+            next();
+        } catch (e) {
+            console.error('verifyRole error:', e);
+            return res.status(500).json({
+                errCode: 500,
+                errMessage: 'Server error'
             });
         }
+    };
+};
 
-        const adminProfile = await db.Admin.findOne({
-            where: { userId: req.user.id }
-        });
+const verifyRoles = (...roles) => {
+    return async (req, res, next) => {
+        try {
+            const userRoles = req.user.roles?.map((r) => r.name) || [];
 
-        if (!adminProfile || adminProfile.roleType !== 'system') {
-            return res.status(403).json({
-                errCode: 403,
-                errMessage: 'Require system admin role'
+            const hasRole = roles.some((role) =>
+                userRoles
+                    .map((r) => r.toLowerCase())
+                    .includes(role.toLowerCase())
+            );
+
+            if (!hasRole) {
+                return res.status(403).json({
+                    errCode: 403,
+                    errMessage: 'Require one of roles: ' + roles.join(', ')
+                });
+            }
+
+            next();
+        } catch (e) {
+            console.error('verifyRoles error:', e);
+            return res.status(500).json({
+                errCode: 500,
+                errMessage: 'Server error'
             });
         }
+    };
+};
 
-        next();
-    } catch (e) {
-        return res.status(500).json({
-            errCode: 500,
-            errMessage: 'Server error'
-        });
-    }
+const verifyPermission = (permissionName) => {
+    return async (req, res, next) => {
+        try {
+            const userPermissions =
+                req.user.permissions?.map((p) => p.name.toLowerCase()) || [];
+
+            if (!userPermissions.includes(permissionName.toLowerCase())) {
+                return res.status(403).json({
+                    errCode: 403,
+                    errMessage: `Access denied: requires permission ${permissionName}`
+                });
+            }
+
+            next();
+        } catch (e) {
+            console.error('verifyPermission error:', e);
+            return res.status(500).json({
+                errCode: 500,
+                errMessage: 'Server error'
+            });
+        }
+    };
 };
 
 module.exports = {
     verifyToken,
-    verifyAdmin,
-    verifySystemAdmin,
-    verifyDoctor
+    verifyRole,
+    verifyRoles,
+    verifyPermission
 };

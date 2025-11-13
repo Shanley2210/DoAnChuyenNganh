@@ -20,7 +20,7 @@ const transporter = nodemailer.createTransport({
 const sendMail = async (to, subject, text, html) => {
     try {
         const mailOptions = {
-            from: `"Phòng khám Online" <${process.env.MAIL_USER}>`,
+            from: `"Đặt lịch khám bệnh" <${process.env.MAIL_USER}>`,
             to: to,
             subject: subject,
             text: text,

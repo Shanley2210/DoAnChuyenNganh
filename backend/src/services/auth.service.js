@@ -7,11 +7,9 @@ const { where, Op } = require('sequelize');
 require('dotenv').config();
 
 const generateTokens = (user) => {
-    const accessToken = jwt.sign(
-        { id: user.id, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-    );
+    const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: '1h'
+    });
     const refreshToken = jwt.sign(
         { id: user.id },
         process.env.JWT_REFRESH_SECRET,
@@ -25,12 +23,16 @@ const sendOtpEmail = async (email, otp) => {
     const subject = 'Mã OTP xác thực đăng ký';
     const text = `Mã OTP của bạn là: ${otp}. Mã này sẽ hết hạn sau 3 phút.`; //
     const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Xác thực tài khoản phòng khám</h2>
-        <p>Cảm ơn bạn đã đăng ký. Vui lòng sử dụng mã OTP sau để hoàn tất:</p>
-        <p style="font-size: 24px; font-weight: bold; color: #1a73e8;">${otp}</p>
-        <p>Mã này sẽ hết hạn sau <strong>3 phút</strong>.</p>
-      </div>
+        <div style="max-width:600px;margin:0 auto;background-color:#ffffff;border:1px solid #d0d0d0;padding:25px 30px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#333;line-height:1.6;">
+            <h2 style="color:#0078d7;margin-bottom:15px;text-transform:uppercase;">Xác thực tài khoản phòng khám</h2>
+            <p style="margin-bottom:10px;">Cảm ơn bạn đã đăng ký. Vui lòng sử dụng mã OTP sau để hoàn tất:</p>
+            <div style="text-align:center;margin:20px 0;">
+                <span style="display:inline-block;font-size:28px;font-weight:bold;color:#0078d7;background:#f2f2f2;padding:10px 40px;border:1px solid #ccc;">${otp}</span>
+            </div>
+            <p style="margin-bottom:10px;">Mã này sẽ hết hạn sau <strong>3 phút</strong>.</p>
+            <p style="margin-bottom:5px;">Trân trọng,</p>
+            <p style="font-style:italic;margin:0;">Hệ thống Đặt lịch</p>
+        </div>
     `;
 
     await sendMail(email, subject, text, html);
@@ -96,16 +98,26 @@ const registerService = (name, email, phone, password, confirmPassword) => {
                 user.otpExpires = otpExpiry;
                 await user.save();
             } else {
-                await db.User.create({
+                const newUser = await db.User.create({
                     name: name,
                     email: email,
                     phone: phone,
                     password: hashPassword,
                     otp: otp,
                     otpExpires: otpExpiry,
-                    verify: false,
-                    role: 'patient'
+                    verify: false
                 });
+
+                const defauRole = await db.Role.findOne({
+                    where: { name: 'Patient' }
+                });
+
+                if (defauRole) {
+                    await db.UserRole.create({
+                        userId: newUser.id,
+                        roleId: defauRole.id
+                    });
+                }
             }
 
             await sendOtpEmail(email, otp);
@@ -392,13 +404,6 @@ const refreshTokenService = (refreshToken) => {
                         where: { id: userId, verify: true }
                     });
 
-                    if (!user) {
-                        return resolve({
-                            errCode: 4,
-                            errMessage: 'User not found.'
-                        });
-                    }
-
                     const newTokens = jwt.sign(
                         {
                             id: user.id,
@@ -421,67 +426,6 @@ const refreshTokenService = (refreshToken) => {
     });
 };
 
-const getProfileService = (userId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const user = await db.User.findOne({
-                where: { id: userId, verify: true },
-                attributes: {
-                    exclude: [
-                        'password',
-                        'verify',
-                        'otp',
-                        'otpExpires',
-                        'refreshToken'
-                    ]
-                }
-            });
-
-            if (!user) {
-                return resolve({
-                    errCode: 2,
-                    errMessage: 'User not found'
-                });
-            }
-
-            return resolve({
-                errCode: 0,
-                message: 'Get profile successful',
-                data: user
-            });
-        } catch (e) {
-            return reject(e);
-        }
-    });
-};
-
-const putProfileService = (userId, data) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const userData = {};
-            if (data.name !== undefined) {
-                userData.name = data.name;
-            }
-            if (data.phone !== undefined) {
-                userData.phone = data.phone;
-            }
-
-            if (Object.keys(userData).length > 0) {
-                await db.User.update(userData, {
-                    where: { id: userId }
-                });
-            }
-
-            return resolve({
-                errCode: 0,
-                message: 'Update profile successful'
-            });
-        } catch (e) {
-            return reject(e);
-        }
-    });
-};
-
 module.exports = {
     registerService,
     verifyEmailService,
@@ -490,7 +434,5 @@ module.exports = {
     logoutService,
     forgotPasswordService,
     resetPasswordService,
-    refreshTokenService,
-    getProfileService,
-    putProfileService
+    refreshTokenService
 };

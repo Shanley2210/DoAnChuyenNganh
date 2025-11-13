@@ -10,7 +10,6 @@ module.exports = {
                 phone: '09123456789',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'admin',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -24,7 +23,6 @@ module.exports = {
                 phone: '09123456780',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'admin',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -38,7 +36,6 @@ module.exports = {
                 phone: '09870000001',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -52,7 +49,6 @@ module.exports = {
                 phone: '09870000002',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -66,7 +62,6 @@ module.exports = {
                 phone: '09870000003',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -80,7 +75,6 @@ module.exports = {
                 phone: '09870000004',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -94,7 +88,6 @@ module.exports = {
                 phone: '09870000005',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -108,7 +101,6 @@ module.exports = {
                 phone: '09870000006',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -122,7 +114,6 @@ module.exports = {
                 phone: '09870000007',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -136,7 +127,6 @@ module.exports = {
                 phone: '09870000008',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -150,7 +140,6 @@ module.exports = {
                 phone: '09870000009',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'patient',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -164,7 +153,6 @@ module.exports = {
                 phone: '09770000001',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'doctor',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -178,7 +166,6 @@ module.exports = {
                 phone: '09770000002',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'doctor',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -192,7 +179,6 @@ module.exports = {
                 phone: '09770000003',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'doctor',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -206,7 +192,6 @@ module.exports = {
                 phone: '09770000004',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'doctor',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -220,7 +205,6 @@ module.exports = {
                 phone: '09770000005',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'doctor',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -234,7 +218,6 @@ module.exports = {
                 phone: '09670000001',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'receptionist',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -248,7 +231,6 @@ module.exports = {
                 phone: '09670000002',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'receptionist',
                 verify: true,
                 otp: null,
                 otpExpires: null,
@@ -262,7 +244,6 @@ module.exports = {
                 phone: '09670000003',
                 password:
                     '$2b$10$ATqYJmj/YPwkA/BouqkJsuHCY.uD8VHqIwlUNanIkmI/zN.BqMXg6',
-                role: 'receptionist',
                 verify: true,
                 otp: null,
                 otpExpires: null,

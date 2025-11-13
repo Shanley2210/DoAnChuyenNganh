@@ -27,11 +27,6 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false
             },
-            role: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                defaultValue: 'patient'
-            },
             verify: {
                 type: Sequelize.BOOLEAN,
                 allowNull: true,

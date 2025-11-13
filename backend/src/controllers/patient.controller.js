@@ -2,7 +2,7 @@ const patientService = require('../services/patient.service');
 
 const getDetailPatientController = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = req.user.id;
 
         if (!userId) {
             return res.status(200).json({
@@ -22,27 +22,19 @@ const getDetailPatientController = async (req, res) => {
     }
 };
 
-const createPatientController = async (req, res) => {
+const createProfilePatientController = async (req, res) => {
     try {
         const userId = req.user.id;
-        const role = req.user.role;
         const data = req.body;
 
-        if (!data.dob || !data.gender || !data.address) {
+        if (!data || !userId) {
             return res.status(200).json({
                 errCode: 1,
                 errMessage: 'Missing required parameters'
             });
         }
 
-        if (role !== 'patient') {
-            return res.status(200).json({
-                errCode: 2,
-                errMessage: 'You are not a patient'
-            });
-        }
-
-        const response = await patientService.createPatientService(
+        const response = await patientService.createProfilePatientService(
             userId,
             data
         );
@@ -57,46 +49,77 @@ const createPatientController = async (req, res) => {
     }
 };
 
-const updatePatientController = async (req, res) => {
-    const updateId = req.params.id;
+const updateProfilePatientController = async (req, res) => {
+    const userId = req.user.id;
     const data = req.body;
-    const role = req.user.role;
 
-    if (!data || !updateId) {
+    if (!data) {
         return res.status(200).json({
             errCode: 1,
             errMessage: 'Missing required parameters'
         });
     }
 
-    if (role !== 'patient') {
-        return res.status(200).json({
-            errCode: 2,
-            errMessage: 'You are not a patient'
-        });
-    }
-
-    const response = await patientService.updatePatientService(updateId, data);
+    const response = await patientService.updateProfilePatientService(
+        userId,
+        data
+    );
 
     return res.status(200).json(response);
 };
 
-const deletePatientController = async (req, res) => {
+const getAppointmentsController = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const patientId = req.user.id;
 
-        if (!userId) {
+        const response = await patientService.getAppointmentsService(patientId);
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in getAppointments:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const createAppointmentController = async (req, res) => {
+    const patientId = req.user.id;
+    const { doctorId, slotId, serviceId } = req.body;
+
+    const response = await patientService.createAppointmentService(
+        patientId,
+        doctorId,
+        slotId,
+        serviceId
+    );
+
+    return res.status(200).json(response);
+};
+
+const updateAppointmentController = async (req, res) => {
+    try {
+        const patientId = req.user.id;
+        const appointmentId = req.params.id;
+        const data = req.body;
+
+        if (!data || !appointmentId) {
             return res.status(200).json({
                 errCode: 1,
                 errMessage: 'Missing required parameters'
             });
         }
 
-        const response = await patientService.deletePatientService(userId);
+        const response = await patientService.updateAppointmentService(
+            patientId,
+            appointmentId,
+            data
+        );
 
         return res.status(200).json(response);
     } catch (e) {
-        console.log('Error in deletePatient:', e);
+        console.log('Error in updateAppointment:', e);
         return res.status(500).json({
             errCode: -1,
             errMessage: 'Error from server'
@@ -106,7 +129,9 @@ const deletePatientController = async (req, res) => {
 
 module.exports = {
     getDetailPatientController,
-    createPatientController,
-    updatePatientController,
-    deletePatientController
+    createProfilePatientController,
+    updateProfilePatientController,
+    createAppointmentController,
+    getAppointmentsController,
+    updateAppointmentController
 };

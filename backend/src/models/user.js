@@ -27,6 +27,20 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'userId',
                 as: 'receptionist'
             });
+
+            User.belongsToMany(models.Role, {
+                through: 'UserRole',
+                foreignKey: 'userId',
+                otherKey: 'roleId',
+                as: 'roles'
+            });
+
+            User.belongsToMany(models.Permission, {
+                through: 'UserPermission',
+                foreignKey: 'userId',
+                otherKey: 'permissionId',
+                as: 'permissions'
+            });
         }
     }
     User.init(
@@ -35,7 +49,6 @@ module.exports = (sequelize, DataTypes) => {
             email: DataTypes.STRING,
             phone: DataTypes.STRING,
             password: DataTypes.STRING,
-            role: DataTypes.STRING,
             verify: DataTypes.BOOLEAN,
             otp: DataTypes.STRING,
             otpExpires: DataTypes.DATE,

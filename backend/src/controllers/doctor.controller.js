@@ -1,8 +1,8 @@
 const doctorService = require('../services/doctor.service');
 
-const getDoctorsController = async (req, res) => {
+const getAllDoctorsController = async (req, res) => {
     try {
-        const response = await doctorService.getDoctorsService();
+        const response = await doctorService.getAllDoctorsService();
 
         return res.status(200).json(response);
     } catch (e) {
@@ -72,9 +72,52 @@ const getSlotsController = async (req, res) => {
     }
 };
 
+const getDoctorBySpecialtyController = async (req, res) => {
+    try {
+        const specialtyId = req.params.id;
+
+        if (!specialtyId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await doctorService.getDoctorBySpecialtyService(
+            specialtyId
+        );
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in getDoctorBySpecialty:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const getAppointmentsController = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const response = await doctorService.getAppointmentsService(userId);
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in getAppointments:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
 module.exports = {
-    getDoctorsController,
+    getAllDoctorsController,
     getDoctorByIdController,
     getSchedulesController,
-    getSlotsController
+    getSlotsController,
+    getDoctorBySpecialtyController,
+    getAppointmentsController
 };

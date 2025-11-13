@@ -18,88 +18,6 @@ const getShiftTime = (shift) => {
     }
 };
 
-const getUsersService = () => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const users = await db.User.findAll({
-                oder: [
-                    ['role', 'ASC'],
-                    ['name', 'ASC']
-                ],
-                attributes: {
-                    exclude: ['password', 'otp', 'otpExpires', 'refreshToken']
-                }
-            });
-
-            return resolve({
-                errCode: 0,
-                message: 'Get users successful',
-                data: users
-            });
-        } catch (e) {
-            return reject(e);
-        }
-    });
-};
-
-const getUserByIdService = (userId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const user = await db.User.findOne({
-                where: { id: userId },
-                attributes: {
-                    exclude: ['password', 'otp', 'otpExpires', 'refreshToken']
-                },
-                include: [
-                    {
-                        model: db.Patient,
-                        as: 'patient',
-                        attributes: {
-                            exclude: ['id', 'userId']
-                        }
-                    },
-                    {
-                        model: db.Doctor,
-                        as: 'doctor',
-                        attributes: {
-                            exclude: ['id', 'userId']
-                        }
-                    },
-                    {
-                        model: db.Admin,
-                        as: 'admin',
-                        attributes: {
-                            exclude: ['id', 'userId']
-                        }
-                    },
-                    {
-                        model: db.Receptionist,
-                        as: 'receptionist',
-                        attributes: {
-                            exclude: ['id', 'userId']
-                        }
-                    }
-                ]
-            });
-
-            if (!user) {
-                return resolve({
-                    errCode: 2,
-                    errMessage: 'User not found'
-                });
-            }
-
-            return resolve({
-                errCode: 0,
-                message: 'Get user successful',
-                data: user
-            });
-        } catch (e) {
-            return reject(e);
-        }
-    });
-};
-
 const createHopistalAdminService = (
     name,
     email,
@@ -150,8 +68,7 @@ const createHopistalAdminService = (
             );
             await db.Admin.create(
                 {
-                    userId: newUser.id,
-                    roleType: 'hopistal'
+                    userId: newUser.id
                 },
                 { transaction: trans }
             );
@@ -169,15 +86,456 @@ const createHopistalAdminService = (
     });
 };
 
-const createUserService = (data, imageFilename) => {
+const getRolesService = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const roles = await db.Role.findAll();
+
+            if (!roles) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Roles not found'
+                });
+            }
+
+            return resolve({
+                errCode: 0,
+                message: 'Get roles successful',
+                data: roles
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const createRoleService = (name, description) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const existingRole = await db.Role.findOne({
+                where: { name: name }
+            });
+
+            if (existingRole) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Role already exists'
+                });
+            }
+
+            await db.Role.create({
+                name: name,
+                description: description
+            });
+
+            return resolve({
+                errCode: 0,
+                message: 'Create role successful'
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const deleteRoleService = (roleId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const role = await db.Role.findOne({
+                where: { id: roleId }
+            });
+
+            if (!role) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Role not found'
+                });
+            }
+
+            await db.Role.destroy({
+                where: { id: roleId }
+            });
+
+            return resolve({
+                errCode: 0,
+                message: 'Delete role successful'
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const getPermissionsService = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const permissions = await db.Permission.findAll();
+
+            if (!permissions) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Permissions not found'
+                });
+            }
+
+            return resolve({
+                errCode: 0,
+                message: 'Get permissions successful',
+                data: permissions
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const createPermissionService = (name, description) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const existingPermission = await db.Permission.findOne({
+                where: { name: name }
+            });
+
+            if (existingPermission) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Permission already exists'
+                });
+            }
+
+            await db.Permission.create({
+                name: name,
+                description: description
+            });
+
+            return resolve({
+                errCode: 0,
+                message: 'Create permission successful'
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const deletePermissionService = (permissionId) => {
+    return new Promise(async (resolve, reject) => {
+        const permission = await db.Permission.findOne({
+            where: { id: permissionId }
+        });
+
+        if (!permission) {
+            return resolve({
+                errCode: 2,
+                errMessage: 'Permission not found'
+            });
+        }
+
+        await db.Permission.destroy({
+            where: { id: permissionId }
+        });
+
+        return resolve({
+            errCode: 0,
+            message: 'Delete permission successful'
+        });
+    });
+};
+
+const getUserPermissionService = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const users = await db.User.findAll({
+                attributes: {
+                    exclude: ['password', 'otp', 'otpExpires', 'refreshToken']
+                },
+                include: [
+                    {
+                        model: db.Permission,
+                        as: 'permissions',
+                        through: { attributes: [] }
+                    }
+                ]
+            });
+
+            if (!users) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Users not found'
+                });
+            }
+
+            return resolve({
+                errCode: 0,
+                message: 'Get users successful',
+                data: users
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const createUserPermissionService = (userId, permissionId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const existing = await db.UserPermission.findOne({
+                where: { userId: userId, permissionId: permissionId }
+            });
+
+            if (existing) {
+                return resolve({
+                    errCode: 2,
+                    errMessage:
+                        'The user has already been granted this permission.'
+                });
+            }
+
+            await db.UserPermission.create({
+                userId: userId,
+                permissionId: permissionId
+            });
+
+            return resolve({
+                errCode: 0,
+                message: 'Permission granted successfully.'
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const deleteUserPermissionService = (userId, permissionId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const userpermission = await db.UserPermission.findOne({
+                where: { userId: userId, permissionId: permissionId }
+            });
+
+            if (!userpermission) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'User permission not found'
+                });
+            }
+
+            await db.UserPermission.destroy({
+                where: { userId: userId, permissionId: permissionId }
+            });
+
+            return resolve({
+                errCode: 0,
+                message: 'Delete user permission successful'
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const getUsersService = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const users = await db.User.findAll({
+                oder: [
+                    ['role', 'ASC'],
+                    ['name', 'ASC']
+                ],
+                attributes: {
+                    exclude: ['password', 'otp', 'otpExpires', 'refreshToken']
+                }
+            });
+
+            return resolve({
+                errCode: 0,
+                message: 'Get users successful',
+                data: users
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const getUserByIdService = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await db.User.findOne({
+                where: { id: userId },
+                attributes: {
+                    exclude: ['password', 'otp', 'otpExpires', 'refreshToken']
+                },
+                include: [
+                    {
+                        model: db.Patient,
+                        as: 'patient',
+                        attributes: {
+                            exclude: ['id', 'userId']
+                        }
+                    },
+                    {
+                        model: db.Doctor,
+                        as: 'doctor',
+                        attributes: {
+                            exclude: ['id', 'userId']
+                        }
+                    },
+                    {
+                        model: db.Receptionist,
+                        as: 'receptionist',
+                        attributes: {
+                            exclude: ['id', 'userId']
+                        }
+                    },
+                    {
+                        model: db.Role,
+                        as: 'roles',
+                        through: { attributes: [] },
+                        include: [
+                            {
+                                model: db.Permission,
+                                as: 'permissions',
+                                through: { attributes: [] }
+                            }
+                        ]
+                    }
+                ]
+            });
+
+            if (!user) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'User not found'
+                });
+            }
+
+            return resolve({
+                errCode: 0,
+                message: 'Get user successful',
+                data: user
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
+const deleteUserService = (delId) => {
     return new Promise(async (resolve, reject) => {
         const trans = await db.sequelize.transaction();
-        const { name, email, phone, password, confirmPassword, role } = data;
+
+        try {
+            const userDel = await db.User.findOne({
+                where: { id: delId },
+                include: [
+                    {
+                        model: db.Role,
+                        as: 'roles',
+                        through: { attributes: [] }
+                    }
+                ],
+                transaction: trans
+            });
+
+            if (!userDel) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'User not found'
+                });
+            }
+
+            const roleDelete = userDel.roles;
+            const RoleDel = roleDelete[0].id;
+
+            if (RoleDel === 4) {
+                const doctor = await db.Doctor.findOne({
+                    where: { userId: delId },
+                    transaction: trans
+                });
+
+                const oldImagePath = doctor.image;
+
+                await db.Doctor.destroy({
+                    where: { userId: delId },
+                    transaction: trans
+                });
+
+                const fullOldImagePath = path.join(
+                    __dirname,
+                    '..',
+                    oldImagePath
+                );
+                if (fs.existsSync(fullOldImagePath)) {
+                    fs.unlinkSync(fullOldImagePath);
+                }
+            } else if (RoleDel === 5) {
+                const receptionist = await db.Receptionist.findOne({
+                    where: { userId: delId },
+                    transaction: trans
+                });
+
+                const oldImagePath = receptionist.image;
+
+                await db.Receptionist.destroy({
+                    where: { userId: delId },
+                    transaction: trans
+                });
+
+                const fullOldImagePath = path.join(
+                    __dirname,
+                    '..',
+                    oldImagePath
+                );
+                if (fs.existsSync(fullOldImagePath)) {
+                    fs.unlinkSync(fullOldImagePath);
+                }
+            } else if (RoleDel === 3) {
+                await db.Patient.destroy({
+                    where: { userId: delId },
+                    transaction: trans
+                });
+            } else if (RoleDel === 2) {
+                await db.Admin.destroy({
+                    where: { userId: delId },
+                    transaction: trans
+                });
+            }
+
+            await db.UserRole.destroy({
+                where: { userId: delId, roleId: RoleDel },
+                transaction: trans
+            });
+
+            await db.User.destroy({
+                where: { id: delId },
+                transaction: trans
+            });
+
+            await trans.commit();
+
+            return resolve({
+                errCode: 0,
+                message: 'Delete user successful'
+            });
+        } catch (e) {
+            trans.rollback();
+            return reject(e);
+        }
+    });
+};
+
+const createDoctorService = (data, imageFilename) => {
+    return new Promise(async (resolve, reject) => {
+        const trans = await db.sequelize.transaction();
+        const { name, email, phone, password, confirmPassword } = data;
 
         try {
             if (password !== confirmPassword) {
+                await trans.rollback();
                 return resolve({
-                    errCode: 2,
+                    errCode: 3,
                     errMessage: 'Password and confirm password do not match'
                 });
             }
@@ -191,14 +549,12 @@ const createUserService = (data, imageFilename) => {
             if (existingVerifiedUser) {
                 await trans.rollback();
                 return resolve({
-                    errCode: 3,
+                    errCode: 4,
                     errMessage: 'Email or phone number already in use'
                 });
             }
 
-            const imagePath = path
-                .join('/uploads', 'users', imageFilename)
-                .replace(/\\/g, '/');
+            const imagePath = `/uploads/doctors/${imageFilename}`;
 
             const hashPassword = await bcrypt.hash(password, 10);
 
@@ -209,7 +565,6 @@ const createUserService = (data, imageFilename) => {
                     phone: phone,
                     password: hashPassword,
                     verify: true,
-                    role: role,
                     otp: null,
                     otpExpires: null,
                     refreshToken: null
@@ -217,52 +572,83 @@ const createUserService = (data, imageFilename) => {
                 { transaction: trans }
             );
 
-            if (role === 'doctor') {
-                const { specialtyId, room } = data;
+            const defauRole = await db.Role.findOne({
+                where: { name: 'Doctor' },
+                transaction: trans
+            });
 
-                if (!specialtyId || !room) {
-                    await trans.rollback();
-                    return resolve({
-                        errCode: 1,
-                        errMessage: 'Missing required parameters'
-                    });
-                }
-
-                await db.Doctor.create(
-                    {
-                        userId: newUser.id,
-                        specialtyId: specialtyId,
-                        room: room,
-                        image: imagePath,
-                        status: 'active'
-                    },
-                    { transaction: trans }
-                );
-            } else if (role === 'receptionist') {
-                await db.Receptionist.create(
-                    {
-                        userId: newUser.id,
-                        image: imagePath,
-                        status: 'active'
-                    },
-                    { transaction: trans }
-                );
+            if (!defauRole) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 5,
+                    errMessage: 'Doctor role not found'
+                });
             }
+
+            await db.UserRole.create(
+                {
+                    userId: newUser.id,
+                    roleId: defauRole.id
+                },
+                { transaction: trans }
+            );
+
+            const {
+                specialtyId,
+                dob,
+                gender,
+                ethnicity,
+                address,
+                degree,
+                room
+            } = data;
+
+            if (
+                !specialtyId ||
+                !room ||
+                !dob ||
+                !ethnicity ||
+                !gender ||
+                !address ||
+                !degree
+            ) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            }
+
+            await db.Doctor.create(
+                {
+                    userId: newUser.id,
+                    specialtyId: specialtyId,
+                    dob: dob,
+                    ethnicity: ethnicity,
+                    gender: gender,
+                    address: address,
+                    degree: degree,
+                    room: room,
+                    image: imagePath,
+                    status: 'active'
+                },
+                { transaction: trans }
+            );
 
             await trans.commit();
 
             return resolve({
                 errCode: 0,
-                message: `Create ${role} successful`
+                message: `Create doctor successful`
             });
         } catch (e) {
-            trans.rollback();
+            await trans.rollback();
             return reject(e);
         }
     });
 };
 
-const updateUserService = (userId, data, imageFile) => {
+const updateDoctorService = (userId, data, imageFile) => {
     return new Promise(async (resolve, reject) => {
         const trans = await db.sequelize.transaction();
 
@@ -323,73 +709,42 @@ const updateUserService = (userId, data, imageFile) => {
                 transaction: trans
             });
 
-            if (user.role === 'doctor') {
-                const doctor = await db.Doctor.findOne({
+            const doctor = await db.Doctor.findOne({
+                where: { userId: userId },
+                transaction: trans
+            });
+
+            const oldImagePath = doctor.image;
+
+            const doctorData = {};
+            if (data.specialtyId !== undefined)
+                doctorData.specialtyId = data.specialtyId;
+            if (data.dob !== undefined) doctorData.dob = data.dob;
+            if (data.gender !== undefined) doctorData.gender = data.gender;
+            if (data.ethnicity !== undefined)
+                doctorData.ethnicity = data.ethnicity;
+            if (data.address !== undefined) doctorData.address = data.address;
+            if (data.degree !== undefined) doctorData.degree = data.degree;
+            if (data.room !== undefined) doctorData.room = data.room;
+            if (data.status !== undefined) doctorData.status = data.status;
+            if (imageFile !== undefined)
+                doctorData.image = `/uploads/doctors/${imageFile.filename}`;
+
+            if (Object.keys(doctorData).length > 0) {
+                await db.Doctor.update(doctorData, {
                     where: { userId: userId },
                     transaction: trans
                 });
+            }
 
-                const oldImagePath = doctor.image;
-
-                const doctorData = {};
-                if (data.specialtyId !== undefined)
-                    doctorData.specialtyId = data.specialtyId;
-                if (data.room !== undefined) doctorData.room = data.room;
-                if (data.status !== undefined) doctorData.status = data.status;
-                if (imageFile !== undefined)
-                    doctorData.image = path
-                        .join('/uploads', 'doctors', imageFile.filename)
-                        .replace(/\\/g, '/');
-
-                if (Object.keys(doctorData).length > 0) {
-                    await db.Doctor.update(doctorData, {
-                        where: { userId: userId },
-                        transaction: trans
-                    });
-                }
-
-                if (imageFile && oldImagePath) {
-                    const fullOldImagePath = path.join(
-                        __dirname,
-                        '..',
-                        oldImagePath
-                    );
-                    if (fs.existsSync(fullOldImagePath)) {
-                        fs.unlinkSync(fullOldImagePath);
-                    }
-                }
-            } else if (user.role === 'receptionist') {
-                const receptionist = await db.Receptionist.findOne({
-                    where: { userId: userId },
-                    transaction: trans
-                });
-
-                const oldImagePath = receptionist.image;
-
-                const receptionistData = {};
-                if (data.status !== undefined)
-                    receptionistData.status = data.status;
-                if (imageFile !== undefined)
-                    receptionistData.image = path
-                        .join('/uploads', 'receptionists', imageFile.filename)
-                        .replace(/\\/g, '/');
-
-                if (Object.keys(receptionistData).length > 0) {
-                    await db.Receptionist.update(receptionistData, {
-                        where: { userId: userId },
-                        transaction: trans
-                    });
-                }
-
-                if (imageFile && oldImagePath) {
-                    const fullOldImagePath = path.join(
-                        __dirname,
-                        '..',
-                        oldImagePath
-                    );
-                    if (fs.existsSync(fullOldImagePath)) {
-                        fs.unlinkSync(fullOldImagePath);
-                    }
+            if (imageFile && oldImagePath) {
+                const fullOldImagePath = path.join(
+                    __dirname,
+                    '..',
+                    oldImagePath
+                );
+                if (fs.existsSync(fullOldImagePath)) {
+                    fs.unlinkSync(fullOldImagePath);
                 }
             }
 
@@ -406,17 +761,120 @@ const updateUserService = (userId, data, imageFile) => {
     });
 };
 
-const deleteUserService = (userId, IdDel) => {
+const createReceptionistService = (data, imageFilename) => {
+    return new Promise(async (resolve, reject) => {
+        const trans = await db.sequelize.transaction();
+        const { name, email, phone, password, confirmPassword } = data;
+
+        try {
+            if (password !== confirmPassword) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'Password and confirm password do not match'
+                });
+            }
+
+            const existingVerifiedUser = await db.User.findOne({
+                where: {
+                    [Op.or]: [{ email: email }, { phone: phone }]
+                }
+            });
+
+            if (existingVerifiedUser) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 4,
+                    errMessage: 'Email or phone number already in use'
+                });
+            }
+
+            const imagePath = `/uploads/receptionists/${imageFilename}`;
+
+            const hashPassword = await bcrypt.hash(password, 10);
+
+            const newUser = await db.User.create(
+                {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    password: hashPassword,
+                    verify: true,
+                    otp: null,
+                    otpExpires: null,
+                    refreshToken: null
+                },
+                { transaction: trans }
+            );
+
+            const defauRole = await db.Role.findOne({
+                where: { name: 'Receptionist' },
+                transaction: trans
+            });
+
+            if (!defauRole) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 5,
+                    errMessage: 'Receptionist role not found'
+                });
+            }
+
+            await db.UserRole.create(
+                {
+                    userId: newUser.id,
+                    roleId: defauRole.id
+                },
+                { transaction: trans }
+            );
+
+            const { dob, gender, ethnicity, address } = data;
+
+            if (!dob || !ethnicity || !gender || !address) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                });
+            }
+
+            await db.Receptionist.create(
+                {
+                    userId: newUser.id,
+                    dob: dob,
+                    ethnicity: ethnicity,
+                    gender: gender,
+                    address: address,
+                    image: imagePath,
+                    status: 'active'
+                },
+                { transaction: trans }
+            );
+
+            await trans.commit();
+
+            return resolve({
+                errCode: 0,
+                message: `Create receptionist successful`
+            });
+        } catch (e) {
+            await trans.rollback();
+            return reject(e);
+        }
+    });
+};
+
+const updatereceptionistService = (userId, data, imageFile) => {
     return new Promise(async (resolve, reject) => {
         const trans = await db.sequelize.transaction();
 
         try {
-            const userDel = await db.User.findOne({
-                where: { id: IdDel },
+            const user = await db.User.findOne({
+                where: { id: userId },
                 transaction: trans
             });
 
-            if (!userDel) {
+            if (!user) {
                 await trans.rollback();
                 return resolve({
                     errCode: 2,
@@ -424,114 +882,95 @@ const deleteUserService = (userId, IdDel) => {
                 });
             }
 
-            const RoleDel = userDel.role;
-
-            if (RoleDel === 'admin') {
-                const sysAdmin = await db.Admin.findOne({
-                    where: { userId: userId },
+            if (data.email && data.email !== user.email) {
+                const existingUser = await db.User.findOne({
+                    where: { email: data.email, id: { [Op.ne]: userId } },
                     transaction: trans
                 });
-
-                if (!sysAdmin || sysAdmin.roleType !== 'system') {
+                if (existingUser) {
                     await trans.rollback();
                     return resolve({
                         errCode: 3,
-                        errMessage: "You don't have permission to delete this"
+                        errMessage: 'Email already in use'
+                    });
+                }
+            }
+            if (data.phone && data.phone !== user.phone) {
+                const existingUser = await db.User.findOne({
+                    where: { phone: data.phone, id: { [Op.ne]: userId } },
+                    transaction: trans
+                });
+                if (existingUser) {
+                    await trans.rollback();
+                    return resolve({
+                        errCode: 4,
+                        errMessage: 'Phone number already in use'
                     });
                 }
             }
 
-            if (RoleDel === 'doctor') {
-                const doctor = await db.Doctor.findOne({
-                    where: { userId: IdDel },
-                    transaction: trans
-                });
+            const userData = {};
+            if (data.name !== undefined) {
+                userData.name = data.name;
+            }
+            if (data.email !== undefined) {
+                userData.email = data.email;
+            }
+            if (data.phone !== undefined) {
+                userData.phone = data.phone;
+            }
 
-                const oldImagePath = doctor.image;
+            await db.User.update(userData, {
+                where: { id: userId },
+                transaction: trans
+            });
 
-                await db.Doctor.destroy({
-                    where: { userId: IdDel },
-                    transaction: trans
-                });
+            const receptionist = await db.Receptionist.findOne({
+                where: { userId: userId },
+                transaction: trans
+            });
 
-                const fullOldImagePath = path.join(
-                    __dirname,
-                    '..',
-                    oldImagePath
-                );
-                if (fs.existsSync(fullOldImagePath)) {
-                    fs.unlinkSync(fullOldImagePath);
-                }
-            } else if (RoleDel === 'receptionist') {
-                const receptionist = await db.Receptionist.findOne({
-                    where: { userId: IdDel },
-                    transaction: trans
-                });
+            const oldImagePath = receptionist.image;
 
-                const oldImagePath = receptionist.image;
+            const receptionistData = {};
+            if (data.dob !== undefined) receptionistData.dob = data.dob;
+            if (data.gender !== undefined)
+                receptionistData.gender = data.gender;
+            if (data.ethnicity !== undefined)
+                receptionistData.ethnicity = data.ethnicity;
+            if (data.address !== undefined)
+                receptionistData.address = data.address;
+            if (data.status !== undefined)
+                receptionistData.status = data.status;
+            if (imageFile !== undefined)
+                receptionistData.image = `/uploads/receptionists/${imageFile.filename}`;
 
-                await db.Receptionist.destroy({
-                    where: { userId: IdDel },
-                    transaction: trans
-                });
-
-                const fullOldImagePath = path.join(
-                    __dirname,
-                    '..',
-                    oldImagePath
-                );
-                if (fs.existsSync(fullOldImagePath)) {
-                    fs.unlinkSync(fullOldImagePath);
-                }
-            } else if (RoleDel === 'patient') {
-                await db.Patient.destroy({
-                    where: { userId: IdDel },
-                    transaction: trans
-                });
-            } else if (RoleDel === 'admin') {
-                await db.Admin.destroy({
-                    where: { userId: IdDel },
+            if (Object.keys(receptionistData).length > 0) {
+                await db.Receptionist.update(receptionistData, {
+                    where: { userId: userId },
                     transaction: trans
                 });
             }
 
-            await db.User.destroy({
-                where: { id: IdDel },
-                transaction: trans
-            });
+            if (imageFile && oldImagePath) {
+                const fullOldImagePath = path.join(
+                    __dirname,
+                    '..',
+                    oldImagePath
+                );
+                if (fs.existsSync(fullOldImagePath)) {
+                    fs.unlinkSync(fullOldImagePath);
+                }
+            }
 
             await trans.commit();
 
             return resolve({
                 errCode: 0,
-                message: 'Delete user successful'
+                message: 'Update user successful'
             });
         } catch (e) {
             trans.rollback();
-            return reject(e);
-        }
-    });
-};
-
-const getPatientsService = () => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const patients = await db.Patient.findAll({
-                include: [
-                    {
-                        model: db.User,
-                        as: 'user',
-                        attributes: ['name', 'email', 'phone']
-                    }
-                ]
-            });
-
-            return resolve({
-                errCode: 0,
-                message: 'Get patients successful',
-                data: patients
-            });
-        } catch (e) {
             return reject(e);
         }
     });
@@ -551,9 +990,7 @@ const createSpecialtyService = (name, description, imageFilename, status) => {
                 });
             }
 
-            const imagePath = path
-                .join('/uploads', 'specialties', imageFilename)
-                .replace(/\\/g, '/');
+            const imagePath = `/uploads/specialties/${imageFilename}`;
 
             await db.Specialty.create({
                 name: name,
@@ -790,6 +1227,37 @@ const deleteServiceService = (serviceId) => {
     });
 };
 
+const getSchedulesService = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const schedules = await db.Schedule.findAll({
+                where: { doctorId: doctorId },
+                include: [
+                    {
+                        model: db.Slot,
+                        as: 'slots'
+                    }
+                ]
+            });
+
+            if (!schedules) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Schedule not found'
+                });
+            }
+
+            return resolve({
+                errCode: 0,
+                message: 'Get schedules successful',
+                data: schedules
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
 const createScheduleAndSlotService = (
     doctorId,
     name,
@@ -869,7 +1337,7 @@ const createScheduleAndSlotService = (
                         scheduleId: newSchedule.id,
                         startTime: currentTime,
                         endTime: nextTime,
-                        capacity: 1,
+                        capacity: 3,
                         status: 'available'
                     });
 
@@ -892,19 +1360,109 @@ const createScheduleAndSlotService = (
     });
 };
 
+const deleteScheduleService = (scheduleId) => {
+    return new Promise(async (resolve, reject) => {
+        const trans = await db.sequelize.transaction();
+
+        try {
+            const schedule = await db.Schedule.findOne({
+                where: { id: scheduleId },
+                transaction: trans
+            });
+
+            if (!schedule) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Schedule not found'
+                });
+            }
+
+            const delSlots = await db.Slot.destroy({
+                where: { scheduleId: scheduleId },
+                transaction: trans
+            });
+
+            await db.Schedule.destroy({
+                where: { id: scheduleId },
+                transaction: trans
+            });
+
+            await trans.commit();
+
+            return resolve({
+                errCode: 0,
+                message: `Delete schedule successful. Deleted ${delSlots} slots.`
+            });
+        } catch (e) {
+            trans.rollback();
+            return reject(e);
+        }
+    });
+};
+
+const setPriceDoctorService = (doctorId, price) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const doctor = await db.Doctor.findOne({
+                where: { id: doctorId }
+            });
+
+            if (!doctor) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Doctor not found'
+                });
+            }
+
+            if (price <= 0) {
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'Price must be greater than 0'
+                });
+            }
+
+            await db.Doctor.update(
+                { price: price },
+                { where: { id: doctorId } }
+            );
+
+            return resolve({
+                errCode: 0,
+                message: 'Set price successful'
+            });
+        } catch (e) {
+            return reject(e);
+        }
+    });
+};
+
 module.exports = {
+    createHopistalAdminService,
+    getRolesService,
+    createRoleService,
+    deleteRoleService,
+    getPermissionsService,
+    createPermissionService,
+    deletePermissionService,
+    getUserPermissionService,
+    createUserPermissionService,
+    deleteUserPermissionService,
     getUsersService,
     getUserByIdService,
-    createHopistalAdminService,
-    createUserService,
-    updateUserService,
     deleteUserService,
-    getPatientsService,
+    createDoctorService,
+    updateDoctorService,
+    createReceptionistService,
+    updatereceptionistService,
     createSpecialtyService,
     updateSpecialtyService,
     deleteSpecialtyService,
     createServiceService,
     updateServiceService,
     deleteServiceService,
-    createScheduleAndSlotService
+    createScheduleAndSlotService,
+    deleteScheduleService,
+    getSchedulesService,
+    setPriceDoctorService
 };

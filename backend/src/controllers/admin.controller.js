@@ -2,6 +2,230 @@ const adminService = require('../services/admin.service');
 const fs = require('fs');
 const path = require('path');
 
+const createHopistalAdminController = async (req, res) => {
+    try {
+        const { name, email, phone, password, confirmPassword } = req.body;
+
+        if (!name || !email || !phone || !password || !confirmPassword) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.createHopistalAdminService(
+            name,
+            email,
+            phone,
+            password,
+            confirmPassword
+        );
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in createHopistalAdmin:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const getRolesController = async (req, res) => {
+    try {
+        const response = await adminService.getRolesService();
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in getRoles:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const createRoleController = async (req, res) => {
+    try {
+        const { name, description } = req.body;
+
+        if (!name || !description) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.createRoleService(
+            name,
+            description
+        );
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in createRole:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const deleteRoleController = async (req, res) => {
+    try {
+        const roleId = req.params.id;
+
+        if (!roleId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.deleteRoleService(roleId);
+
+        return res.status(200).json(response);
+        s;
+    } catch (e) {
+        console.log('Error in deleteRole:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const getPermissionsController = async (req, res) => {
+    try {
+        const response = await adminService.getPermissionsService();
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in getPermissions:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const createPermissionController = async (req, res) => {
+    try {
+        const { name, description } = req.body;
+
+        if (!name || !description) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.createPermissionService(
+            name,
+            description
+        );
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in createPermission:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const deletePermissionController = async (req, res) => {
+    try {
+        const permissionId = req.params.id;
+
+        if (!permissionId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.deletePermissionService(
+            permissionId
+        );
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in deletePermission:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const getUserPermissionController = async (req, res) => {
+    try {
+        const respone = await adminService.getUserPermissionService();
+
+        return res.status(200).json(respone);
+    } catch (e) {
+        console.log('Error in getUserPermission:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const createUserPermissionController = async (req, res) => {
+    try {
+        const { userId, permissionId } = req.body;
+
+        if (!userId || !permissionId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const respone = await adminService.createUserPermissionService(
+            userId,
+            permissionId
+        );
+
+        return res.status(200).json(respone);
+    } catch (e) {
+        console.log('Error in createUserPermission:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const deleteUserPermissionController = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const permissionId = req.params.permissionId;
+
+        if (!userId || !permissionId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const respone = await adminService.deleteUserPermissionService(
+            userId,
+            permissionId
+        );
+
+        return res.status(200).json(respone);
+    } catch (e) {
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
 const getUsersController = async (req, res) => {
     try {
         const response = await adminService.getUsersService();
@@ -38,28 +262,22 @@ const getUserByIdController = async (req, res) => {
     }
 };
 
-const createHopistalAdminController = async (req, res) => {
+const deleteUserController = async (req, res) => {
     try {
-        const { name, email, phone, password, confirmPassword } = req.body;
+        const delId = req.params.id;
 
-        if (!name || !email || !phone || !password || !confirmPassword) {
+        if (!delId) {
             return res.status(200).json({
                 errCode: 1,
                 errMessage: 'Missing required parameters'
             });
         }
 
-        const response = await adminService.createHopistalAdminService(
-            name,
-            email,
-            phone,
-            password,
-            confirmPassword
-        );
+        const response = await adminService.deleteUserService(delId);
 
         return res.status(200).json(response);
     } catch (e) {
-        console.log('Error in createHopistalAdmin:', e);
+        console.log('Error in deleteUser:', e);
         return res.status(500).json({
             errCode: -1,
             errMessage: 'Error from server'
@@ -67,19 +285,11 @@ const createHopistalAdminController = async (req, res) => {
     }
 };
 
-const createUserController = async (req, res) => {
+const createDoctorController = async (req, res) => {
     try {
-        const { name, email, phone, password, confirmPassword, role } =
-            req.body;
+        const { name, email, phone, password, confirmPassword } = req.body;
 
-        if (
-            !name ||
-            !email ||
-            !phone ||
-            !password ||
-            !confirmPassword ||
-            !role
-        ) {
+        if (!name || !email || !phone || !password || !confirmPassword) {
             if (req.file) {
                 fs.unlink(req.file.path, (err) => {
                     if (err)
@@ -105,26 +315,27 @@ const createUserController = async (req, res) => {
 
         const imageFilename = req.file.filename;
 
-        const response = await adminService.createUserService(
+        const response = await adminService.createDoctorService(
             req.body,
             imageFilename
         );
 
         if (response.errCode !== 0) {
             fs.unlinkSync(
-                path.join(__dirname, '../uploads/users', imageFilename)
+                path.join(__dirname, '../uploads/doctors', imageFilename)
             );
         }
 
         return res.status(200).json(response);
     } catch (e) {
-        console.log('Error in createUser:', e);
+        console.log('Error in createDoctor:', e);
         if (e.code === 'LIMIT_FILE_SIZE') {
             return res.status(200).json({
                 errCode: -2,
                 errMessage: 'File size exceeds the limit'
             });
         }
+
         return res.status(500).json({
             errCode: -1,
             errMessage: 'Error from server'
@@ -132,7 +343,7 @@ const createUserController = async (req, res) => {
     }
 };
 
-const updateUserController = async (req, res) => {
+const updateDoctorController = async (req, res) => {
     try {
         const userId = req.params.id;
         const data = req.body;
@@ -145,7 +356,7 @@ const updateUserController = async (req, res) => {
             });
         }
 
-        const response = await adminService.updateUserService(
+        const response = await adminService.updateDoctorService(
             userId,
             data,
             imageFile
@@ -157,7 +368,7 @@ const updateUserController = async (req, res) => {
 
         return res.status(200).json(response);
     } catch (e) {
-        console.log('Error in createUser:', e);
+        console.log('Error in updateDoctor:', e);
         return res.status(500).json({
             errCode: -1,
             errMessage: 'Error from server'
@@ -165,23 +376,57 @@ const updateUserController = async (req, res) => {
     }
 };
 
-const deleteUserController = async (req, res) => {
+const createReceptionistController = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const IdDel = req.params.id;
+        const { name, email, phone, password, confirmPassword } = req.body;
 
-        if (!userId) {
+        if (!name || !email || !phone || !password || !confirmPassword) {
+            if (req.file) {
+                fs.unlink(req.file.path, (err) => {
+                    if (err)
+                        console.error(
+                            'Failed to cleanup uploaded file on error:',
+                            err
+                        );
+                });
+            }
+
             return res.status(200).json({
                 errCode: 1,
                 errMessage: 'Missing required parameters'
             });
         }
 
-        const response = await adminService.deleteUserService(userId, IdDel);
+        if (!req.file) {
+            return res.status(200).json({
+                errCode: 2,
+                errMessage: 'Missing required image'
+            });
+        }
+
+        const imageFilename = req.file.filename;
+
+        const response = await adminService.createReceptionistService(
+            req.body,
+            imageFilename
+        );
+
+        if (response.errCode !== 0) {
+            fs.unlinkSync(
+                path.join(__dirname, '../uploads/receptionists', imageFilename)
+            );
+        }
 
         return res.status(200).json(response);
     } catch (e) {
-        console.log('Error in deleteUser:', e);
+        console.log('Error in createReceptionist:', e);
+        if (e.code === 'LIMIT_FILE_SIZE') {
+            return res.status(200).json({
+                errCode: -2,
+                errMessage: 'File size exceeds the limit'
+            });
+        }
+
         return res.status(500).json({
             errCode: -1,
             errMessage: 'Error from server'
@@ -189,16 +434,36 @@ const deleteUserController = async (req, res) => {
     }
 };
 
-const getPatientsController = async (req, res) => {
+const updatereceptionistController = async (req, res) => {
     try {
-        const response = await adminService.getPatientsService();
+        const userId = req.params.id;
+        const data = req.body;
+        const imageFile = req.file;
+
+        if (!userId || !data) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.updatereceptionistService(
+            userId,
+            data,
+            imageFile
+        );
+
+        if (imageFile && response.errCode !== 0) {
+            fs.unlinkSync(imageFile.path);
+        }
 
         return res.status(200).json(response);
     } catch (e) {
-        console.log('Error in getPatients:', e);
-        return res
-            .status(500)
-            .json({ errCode: -1, errMessage: 'Error from server' });
+        console.log('Error in updateReceptionist:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
     }
 };
 
@@ -278,10 +543,6 @@ const updateSpecialtyController = async (req, res) => {
             data,
             imageFile
         );
-
-        if (imageFile && response.errCode !== 0) {
-            fs.unlinkSync(imageFile.path);
-        }
 
         return res.status(200).json(response);
     } catch (e) {
@@ -395,6 +656,25 @@ const deleteServiceController = async (req, res) => {
     }
 };
 
+const getSchedulesController = async (req, res) => {
+    try {
+        const doctorId = req.params.doctorId;
+
+        if (!doctorId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.getSchedulesService(doctorId);
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in getSchedules:', e);
+    }
+};
+
 const createScheduleController = async (req, res) => {
     try {
         const doctorId = req.params.doctorId;
@@ -425,19 +705,83 @@ const createScheduleController = async (req, res) => {
     }
 };
 
+const deleteScheduleController = async (req, res) => {
+    try {
+        const scheduleId = req.params.id;
+
+        if (!scheduleId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.deleteScheduleService(scheduleId);
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in deleteSchedule:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+    s;
+};
+
+const setPriceDoctorController = async (req, res) => {
+    try {
+        const doctorId = req.params.id;
+        const { price } = req.body;
+
+        if (!doctorId || !price) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await adminService.setPriceDoctorService(
+            doctorId,
+            price
+        );
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in setPrice:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
 module.exports = {
+    createHopistalAdminController,
+    getRolesController,
+    createRoleController,
+    deleteRoleController,
+    getPermissionsController,
+    createPermissionController,
+    deletePermissionController,
+    getUserPermissionController,
+    createUserPermissionController,
+    deleteUserPermissionController,
     getUsersController,
     getUserByIdController,
-    createHopistalAdminController,
-    createUserController,
-    updateUserController,
     deleteUserController,
-    getPatientsController,
+    createDoctorController,
+    updateDoctorController,
+    createReceptionistController,
+    updatereceptionistController,
     createSpecialtyController,
     updateSpecialtyController,
     deleteSpecialtyController,
     createServiceController,
     updateServiceController,
     deleteServiceController,
-    createScheduleController
+    createScheduleController,
+    deleteScheduleController,
+    getSchedulesController,
+    setPriceDoctorController
 };

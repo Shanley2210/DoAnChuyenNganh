@@ -5,27 +5,43 @@ const patientController = require('../controllers/patient.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 router.get(
-    '/detail/:id',
+    '/profile',
     authMiddleware.verifyToken,
     patientController.getDetailPatientController
 );
 
 router.post(
-    '/',
+    '/profile',
     authMiddleware.verifyToken,
-    patientController.createPatientController
+    authMiddleware.verifyRole('Patient'),
+    patientController.createProfilePatientController
 );
 
 router.put(
-    '/:id',
+    '/profile',
     authMiddleware.verifyToken,
-    patientController.updatePatientController
+    authMiddleware.verifyRole('Patient'),
+    patientController.updateProfilePatientController
 );
 
-router.delete(
-    '/:id',
+router.get(
+    '/appointments',
     authMiddleware.verifyToken,
-    patientController.deletePatientController
+    patientController.getAppointmentsController
+);
+
+router.post(
+    '/appointments',
+    authMiddleware.verifyToken,
+    authMiddleware.verifyRole('Patient'),
+    patientController.createAppointmentController
+);
+
+router.put(
+    '/appointments/:id',
+    authMiddleware.verifyToken,
+    authMiddleware.verifyRole('Patient'),
+    patientController.updateAppointmentController
 );
 
 module.exports = router;

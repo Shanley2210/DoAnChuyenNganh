@@ -52,7 +52,10 @@ module.exports = (sequelize, DataTypes) => {
             queueId: DataTypes.INTEGER,
             serviceId: DataTypes.INTEGER,
             status: DataTypes.STRING,
-            deposit: DataTypes.DECIMAL
+            deposit: DataTypes.DECIMAL,
+            deposited: DataTypes.DECIMAL,
+            type: DataTypes.STRING,
+            finalPrice: DataTypes.DECIMAL
         },
         {
             sequelize,

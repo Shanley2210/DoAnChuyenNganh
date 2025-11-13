@@ -1,32 +1,30 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Admin extends Model {
+    class Permission extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Admin.belongsTo(models.User, {
-                foreignKey: 'userId',
-                as: 'user'
-            });
-
-            Admin.hasMany(models.Report, {
-                foreignKey: 'adminId',
-                as: 'reports'
+            Permission.belongsToMany(models.User, {
+                through: 'UserPermission',
+                foreignKey: 'permissionId',
+                otherKey: 'userId',
+                as: 'roles'
             });
         }
     }
-    Admin.init(
+    Permission.init(
         {
-            userId: DataTypes.INTEGER
+            name: DataTypes.STRING,
+            description: DataTypes.STRING
         },
         {
             sequelize,
-            modelName: 'Admin'
+            modelName: 'Permission'
         }
     );
-    return Admin;
+    return Permission;
 };

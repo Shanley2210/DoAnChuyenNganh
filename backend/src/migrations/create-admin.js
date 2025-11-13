@@ -13,10 +13,6 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: true
             },
-            roleType: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE
