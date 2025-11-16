@@ -136,8 +136,6 @@ Hệ thống được thiết kế cho ngữ cảnh bệnh viện Việt Nam (d�
 ## Mục Lục
 
 -   [Tổng Quan](#tổng-quan)
--   [Yêu Cầu Trước](#yêu-cầu-trước)
--   [Chạy API](#chạy-api)
 -   [Các Endpoint API](#các-endpoint-api)
     -   [Xác Thực](#xác-thực)
     -   [Quản Trị](#quản-trị)
@@ -160,29 +158,6 @@ API này được xây dựng bằng Node.js (suy ra từ Express.js trong heade
 -   Lấy thông tin dịch vụ và chuyên khoa.
 
 Tất cả các endpoint đều bắt đầu bằng `/api/`. Xác thực bắt buộc cho các route được bảo vệ bằng Bearer token.
-
-## Yêu Cầu Trước
-
--   Node.js (khuyến nghị v14+)
--   Cơ sở dữ liệu (có thể là MySQL/PostgreSQL dựa trên cấu trúc dữ liệu)
--   Biến môi trường (ví dụ: JWT secret, thông tin cơ sở dữ liệu)
-
-## Chạy API
-
-1. Sao chép kho lưu trữ:
-    ```
-    git clone <repo-url>
-    ```
-2. Cài đặt dependencies:
-    ```
-    npm install
-    ```
-3. Thiết lập file `.env` với các biến cần thiết (ví dụ: `JWT_SECRET`, `DB_URL`).
-4. Chạy server:
-    ```
-    npm start
-    ```
-    Server chạy tại `http://localhost:3000`.
 
 ## Các Endpoint API
 
