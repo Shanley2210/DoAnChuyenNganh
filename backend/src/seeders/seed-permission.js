@@ -86,6 +86,18 @@ module.exports = {
                 description: 'Xem lịch hẹn của bác sĩ',
                 createdAt: new Date(),
                 updatedAt: new Date()
+            },
+            {
+                name: 'queue_manage',
+                description: 'Quản lý hàng đợi',
+                createdAt: new Date(),
+                updatedAt: new Date()
+            },
+            {
+                name: 'comfirm_appointment',
+                description: 'Xác nhận lịch hẹn',
+                createdAt: new Date(),
+                updatedAt: new Date()
             }
         ]);
     },

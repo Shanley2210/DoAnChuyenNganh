@@ -44,4 +44,11 @@ router.put(
     patientController.updateAppointmentController
 );
 
+router.delete(
+    '/appointments/:id',
+    authMiddleware.verifyToken,
+    authMiddleware.verifyRole('Patient'),
+    patientController.deleteAppointmentController
+);
+
 module.exports = router;

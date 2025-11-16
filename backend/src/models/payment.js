@@ -25,8 +25,10 @@ module.exports = (sequelize, DataTypes) => {
             appointmentId: DataTypes.INTEGER,
             amount: DataTypes.DECIMAL,
             method: DataTypes.STRING,
+            type: DataTypes.STRING,
             status: DataTypes.STRING,
-            txnRef: DataTypes.STRING
+            txnRef: DataTypes.STRING,
+            callback_data: DataTypes.JSON
         },
         {
             sequelize,

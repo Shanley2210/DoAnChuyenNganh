@@ -70,7 +70,17 @@ module.exports = {
             { userId: 16, permissionId: 5 },
             { userId: 16, permissionId: 11 },
             { userId: 16, permissionId: 12 },
-            { userId: 16, permissionId: 13 }
+            { userId: 16, permissionId: 13 },
+
+            // ===== Receptionists (userId: 17 → 19) =====
+            { userId: 17, permissionId: 14 }, // queue_manage
+            { userId: 17, permissionId: 15 }, //comfirm_appointment
+
+            { userId: 18, permissionId: 14 },
+            { userId: 18, permissionId: 15 },
+
+            { userId: 19, permissionId: 14 },
+            { userId: 19, permissionId: 15 }
         ];
         // Thêm trường thời gian
         const finalUserPermissions = UserPermissions.map((item) => ({

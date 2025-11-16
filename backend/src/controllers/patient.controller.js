@@ -85,11 +85,11 @@ const getAppointmentsController = async (req, res) => {
 };
 
 const createAppointmentController = async (req, res) => {
-    const patientId = req.user.id;
+    const userId = req.user.id;
     const { doctorId, slotId, serviceId } = req.body;
 
     const response = await patientService.createAppointmentService(
-        patientId,
+        userId,
         doctorId,
         slotId,
         serviceId
@@ -100,7 +100,7 @@ const createAppointmentController = async (req, res) => {
 
 const updateAppointmentController = async (req, res) => {
     try {
-        const patientId = req.user.id;
+        const userId = req.user.id;
         const appointmentId = req.params.id;
         const data = req.body;
 
@@ -112,7 +112,7 @@ const updateAppointmentController = async (req, res) => {
         }
 
         const response = await patientService.updateAppointmentService(
-            patientId,
+            userId,
             appointmentId,
             data
         );
@@ -127,11 +127,39 @@ const updateAppointmentController = async (req, res) => {
     }
 };
 
+const deleteAppointmentController = async (req, res) => {
+    try {
+        const patientId = req.user.id;
+        const appointmentId = req.params.id;
+
+        if (!appointmentId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters'
+            });
+        }
+
+        const response = await patientService.deleteAppointmentService(
+            patientId,
+            appointmentId
+        );
+
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in deleteAppointment:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
 module.exports = {
     getDetailPatientController,
     createProfilePatientController,
     updateProfilePatientController,
     createAppointmentController,
     getAppointmentsController,
-    updateAppointmentController
+    updateAppointmentController,
+    deleteAppointmentController
 };

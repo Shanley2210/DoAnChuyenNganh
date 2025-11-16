@@ -25,12 +25,20 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: true
             },
+            type: {
+                type: Sequelize.STRING,
+                allowNull: true
+            },
             status: {
                 type: Sequelize.STRING,
                 allowNull: true
             },
             txnRef: {
                 type: Sequelize.STRING,
+                allowNull: true
+            },
+            callback_data: {
+                type: Sequelize.JSON,
                 allowNull: true
             },
             createdAt: {
