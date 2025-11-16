@@ -131,7 +131,7 @@ npm run dev
 
 Kho lưu trữ này chứa tài liệu API cho hệ thống quản lý bệnh viện, được xuất từ các bộ sưu tập Postman. API xử lý các chức năng như xác thực người dùng, hoạt động quản trị, quản lý bác sĩ, hồ sơ bệnh nhân, dịch vụ và chuyên khoa.
 
-Hệ thống dường như được thiết kế cho ngữ cảnh bệnh viện Việt Nam (dựa trên tên endpoint và dữ liệu như "Bác sĩ" cho bác sĩ và "Bệnh nhân" cho bệnh nhân). Nó bao gồm các endpoint cho đăng ký, đăng nhập, quản lý hồ sơ, lịch hẹn, và hơn thế nữa.
+Hệ thống được thiết kế cho ngữ cảnh bệnh viện Việt Nam (dựa trên tên endpoint và dữ liệu như "Bác sĩ" cho bác sĩ và "Bệnh nhân" cho bệnh nhân). Nó bao gồm các endpoint cho đăng ký, đăng nhập, quản lý hồ sơ, lịch hẹn, và hơn thế nữa.
 
 ## Mục Lục
 
@@ -156,7 +156,7 @@ API này được xây dựng bằng Node.js (suy ra từ Express.js trong heade
 -   Đăng ký và đăng nhập người dùng với xác thực OTP.
 -   Công cụ quản trị để tạo quản trị viên bệnh viện và quản lý quyền hạn.
 -   Quản lý hồ sơ bác sĩ và bệnh nhân.
--   Lập lịch và quản lý lịch hẹn.
+-   Lập lịch và quản lý lịch hẹn (bao gồm cập nhật và hủy).
 -   Lấy thông tin dịch vụ và chuyên khoa.
 
 Tất cả các endpoint đều bắt đầu bằng `/api/`. Xác thực bắt buộc cho các route được bảo vệ bằng Bearer token.
@@ -199,7 +199,7 @@ Các endpoint được nhóm theo bộ sưu tập Postman. Mỗi endpoint bao g�
     ```json
     {
         "name": "Nguyễn Trung Hiếu",
-        "email": "nguyenhieushanley.riot@gmail.com",
+        "email": "aaaaaa.aa@gmail.com",
         "phone": "11111111111",
         "password": "123456",
         "confirmPassword": "123456"
@@ -450,31 +450,7 @@ Các endpoint được nhóm theo bộ sưu tập Postman. Mỗi endpoint bao g�
         }
         ```
 
-#### 2. Lấy Bác Sĩ Theo Chuyên Khoa
-
--   **Phương Thức**: GET
--   **URL**: `/api/doctor/specialty/:specialtyId`
--   **Mô Tả**: Lấy bác sĩ cho một chuyên khoa cụ thể.
--   **Phản Hồi**:
-    -   Thành công (200 OK):
-        ```json
-        {
-            "errCode": 0,
-            "message": "Get doctors successful",
-            "data": [
-                /* mảng đối tượng bác sĩ */
-            ]
-        }
-        ```
-    -   Chuyên khoa không tìm thấy (200 OK):
-        ```json
-        {
-            "errCode": 2,
-            "errMessage": "Specialty not found"
-        }
-        ```
-
-#### 3. Lấy Lịch Hẹn Của Bác Sĩ
+#### 2. Lấy Lịch Hẹn Của Bác Sĩ
 
 -   **Phương Thức**: GET
 -   **URL**: `/api/doctor/appointments` (Yêu cầu xác thực: Bác sĩ)
@@ -597,6 +573,41 @@ Các endpoint được nhóm theo bộ sưu tập Postman. Mỗi endpoint bao g�
         }
         ```
 
+#### 4. Hủy Lịch Hẹn
+
+-   **Phương Thức**: DELETE
+-   **URL**: `/api/patient/appointments/:id` (Yêu cầu xác thực: Bệnh nhân)
+-   **Mô Tả**: Hủy lịch hẹn hiện có.
+-   **Phản Hồi**:
+    -   Thành công (200 OK):
+        ```json
+        {
+            "errCode": 0,
+            "message": "Cancel appointment successful"
+        }
+        ```
+    -   Không tìm thấy (200 OK):
+        ```json
+        {
+            "errCode": 1,
+            "errMessage": "Appointment not found"
+        }
+        ```
+    -   Không có quyền hủy (200 OK):
+        ```json
+        {
+            "errCode": 2,
+            "errMessage": "You are not the owner of this appointment"
+        }
+        ```
+    -   Không thể hủy (200 OK):
+        ```json
+        {
+            "errCode": 3,
+            "errMessage": "Cannot cancel this appointment"
+        }
+        ```
+
 ### Chuyên Khoa
 
 #### 1. Lấy Tất Cả Chuyên Khoa
@@ -640,19 +651,11 @@ Các endpoint được nhóm theo bộ sưu tập Postman. Mỗi endpoint bao g�
 Các mã lỗi phổ biến trong API:
 
 -   `0`: Thành công
--   `1`: Thiếu tham số bắt buộc
--   `2`: Tài nguyên không tìm thấy hoặc đã tồn tại
--   `3`: Không được ủy quyền (ví dụ: không phải chủ sở hữu)
+-   `1`: Thiếu tham số bắt buộc hoặc không tìm thấy
+-   `2`: Tài nguyên không tìm thấy, đã tồn tại, hoặc không có quyền
+-   `3`: Hành động không được phép (ví dụ: không thể hủy/cập nhật)
 -   `4`: Hành động không hợp lệ (ví dụ: không thể cập nhật)
 -   `5`: Loại không hợp lệ
 -   `6`: Tài nguyên cụ thể không tìm thấy (ví dụ: bác sĩ)
 
 Tất cả lỗi đều trả về 200 OK với body JSON để nhất quán.
-
-## Đóng Góp
-
-Bạn có thể gửi issue hoặc pull request để cải thiện tài liệu hoặc API.
-
-## Giấy Phép
-
-Dự án này được cấp phép theo Giấy phép MIT.
