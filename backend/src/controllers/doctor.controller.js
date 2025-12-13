@@ -113,11 +113,84 @@ const getAppointmentsController = async (req, res) => {
     }
 };
 
+const confirmAppointmentController = async (req, res) => {
+    try {
+        // Lấy userId từ token (người đang đăng nhập)
+        const userId = req.user.id;
+        const { appointmentId } = req.body;
+
+        if (!appointmentId) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage: 'Missing required parameters: appointmentId'
+            });
+        }
+
+        const response = await doctorService.confirmAppointmentService(
+            userId,
+            appointmentId
+        );
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in confirmAppointment:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
+const completeExaminationController = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        // Lấy các thông tin khám bệnh từ body
+        const {
+            appointmentId,
+            diagnosis,
+            symptoms,
+            soapNotes,
+            prescription,
+            reExamDate
+        } = req.body;
+
+        if (!appointmentId || !diagnosis) {
+            return res.status(200).json({
+                errCode: 1,
+                errMessage:
+                    'Missing required parameters (appointmentId, diagnosis)'
+            });
+        }
+
+        const data = {
+            appointmentId,
+            diagnosis,
+            symptoms,
+            soapNotes,
+            prescription,
+            reExamDate
+        };
+
+        const response = await doctorService.completeExaminationService(
+            userId,
+            data
+        );
+        return res.status(200).json(response);
+    } catch (e) {
+        console.log('Error in completeExamination:', e);
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        });
+    }
+};
+
 module.exports = {
     getAllDoctorsController,
     getDoctorByIdController,
     getSchedulesController,
     getSlotsController,
     getDoctorBySpecialtyController,
-    getAppointmentsController
+    getAppointmentsController,
+    confirmAppointmentController,
+    completeExaminationController
 };

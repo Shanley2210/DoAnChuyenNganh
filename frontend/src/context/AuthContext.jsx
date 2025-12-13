@@ -1,48 +1,73 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { jwtDecode } from 'jwt-decode'
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useState
+} from 'react';
+import { jwtDecode } from 'jwt-decode';
 
-const AuthContext = createContext(null)
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [accessToken, setAccessToken] = useState(() => localStorage.getItem('accessToken') || '')
-  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refreshToken') || '')
-  const [user, setUser] = useState(null)
+    const [accessToken, setAccessToken] = useState(
+        () => localStorage.getItem('accessToken') || ''
+    );
+    const [refreshToken, setRefreshToken] = useState(
+        () => localStorage.getItem('refreshToken') || ''
+    );
+    const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    if (accessToken) {
-      localStorage.setItem('accessToken', accessToken)
-      try {
-        const decoded = jwtDecode(accessToken)
-        setUser(decoded)
-      } catch (e) {
-        console.error('Invalid token:', e)
-        setUser(null)
-      }
-    } else {
-      localStorage.removeItem('accessToken')
-      setUser(null)
-    }
-  }, [accessToken])
+    useEffect(() => {
+        if (accessToken) {
+            localStorage.setItem('accessToken', accessToken);
+            try {
+                const decoded = jwtDecode(accessToken);
+                setUser(decoded);
+            } catch {
+                setUser(null);
+            }
+        } else {
+            localStorage.removeItem('accessToken');
+            setUser(null);
+        }
+    }, [accessToken]);
 
-  useEffect(() => {
-    if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
-    else localStorage.removeItem('refreshToken')
-  }, [refreshToken])
+    useEffect(() => {
+        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+        else localStorage.removeItem('refreshToken');
+    }, [refreshToken]);
 
-  const login = (a, r) => {
-    setAccessToken(a)
-    setRefreshToken(r)
-  }
+    const login = (a, r) => {
+        setAccessToken(a);
+        setRefreshToken(r);
+    };
 
-  const logout = () => {
-    setAccessToken('')
-    setRefreshToken('')
-  }
+    const logout = () => {
+        setAccessToken('');
+        setRefreshToken('');
+        setUser(null);
+    };
 
-  const value = useMemo(() => ({ user, accessToken, refreshToken, login, logout, setAccessToken, setRefreshToken }), [user, accessToken, refreshToken])
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    const isAuthenticated = !!accessToken;
+
+    const value = useMemo(
+        () => ({
+            user,
+            accessToken,
+            refreshToken,
+            isAuthenticated,
+            login,
+            logout
+        }),
+        [user, accessToken, refreshToken, isAuthenticated]
+    );
+
+    return (
+        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
-  return useContext(AuthContext)
+    return useContext(AuthContext);
 }

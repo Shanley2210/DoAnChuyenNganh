@@ -28,4 +28,18 @@ router.get(
     doctorController.getAppointmentsController
 );
 
+router.put(
+    '/confirm-appointment',
+    authMiddleware.verifyToken,
+    authMiddleware.verifyRole('Doctor'),
+    doctorController.confirmAppointmentController
+);
+
+router.post(
+    '/complete-examination',
+    authMiddleware.verifyToken,
+    authMiddleware.verifyRole('Doctor'),
+    doctorController.completeExaminationController
+);
+
 module.exports = router;

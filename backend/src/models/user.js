@@ -23,11 +23,6 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'patient'
             });
 
-            User.hasOne(models.Receptionist, {
-                foreignKey: 'userId',
-                as: 'receptionist'
-            });
-
             User.belongsToMany(models.Role, {
                 through: 'UserRole',
                 foreignKey: 'userId',

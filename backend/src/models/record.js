@@ -27,11 +27,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'appointmentId',
                 as: 'appointment'
             });
-
-            Record.hasOne(models.Payment, {
-                foreignKey: 'recordId',
-                as: 'payment'
-            });
         }
     }
     Record.init(

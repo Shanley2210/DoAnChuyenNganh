@@ -21,7 +21,7 @@ const generateTokens = async (user) => {
     const roleNames = userWithRoles?.roles?.map((r) => r.name) || [];
 
     const accessToken = jwt.sign({ id: user.id, roles: roleNames }, process.env.JWT_SECRET, {
-        expiresIn: '1h'
+        expiresIn: '1d'
     });
     const refreshToken = jwt.sign(
         { id: user.id },

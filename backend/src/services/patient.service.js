@@ -244,9 +244,22 @@ const updateProfilePatientService = async (userId, data) => {
     });
 };
 
-const getAppointmentsService = async (patientId) => {
+const getAppointmentsService = async (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
+            const patient = await db.User.findOne({
+                where: { id: userId },
+                include: [
+                    {
+                        model: db.Patient,
+                        as: 'patient',
+                        attributes: ['id']
+                    }
+                ]
+            });
+
+            const patientId = patient.patient.id;
+
             const appointments = await db.Appointment.findAll({
                 where: { patientId: patientId },
                 include: [

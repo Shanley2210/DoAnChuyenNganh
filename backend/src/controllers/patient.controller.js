@@ -70,9 +70,9 @@ const updateProfilePatientController = async (req, res) => {
 
 const getAppointmentsController = async (req, res) => {
     try {
-        const patientId = req.user.id;
+        const userId = req.user.id;
 
-        const response = await patientService.getAppointmentsService(patientId);
+        const response = await patientService.getAppointmentsService(userId);
 
         return res.status(200).json(response);
     } catch (e) {

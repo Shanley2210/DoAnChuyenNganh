@@ -12,11 +12,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'userId',
                 as: 'user'
             });
-
-            Admin.hasMany(models.Report, {
-                foreignKey: 'adminId',
-                as: 'reports'
-            });
         }
     }
     Admin.init(

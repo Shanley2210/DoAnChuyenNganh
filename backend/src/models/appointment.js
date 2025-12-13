@@ -28,19 +28,9 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'record'
             });
 
-            Appointment.belongsTo(models.Queue, {
-                foreignKey: 'queueId',
-                as: 'queue'
-            });
-
             Appointment.belongsTo(models.Service, {
                 foreignKey: 'serviceId',
                 as: 'service'
-            });
-
-            Appointment.hasOne(models.Payment, {
-                foreignKey: 'appointmentId',
-                as: 'payment'
             });
         }
     }

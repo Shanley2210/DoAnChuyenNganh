@@ -263,11 +263,125 @@ const getAppointmentsService = async (userId) => {
     });
 };
 
+const confirmAppointmentService = (userId, appointmentId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const doctor = await db.Doctor.findOne({
+                where: { userId: userId }
+            });
+            if (!doctor) {
+                return resolve({ errCode: 2, errMessage: 'Doctor not found' });
+            }
+
+            const appointment = await db.Appointment.findOne({
+                where: {
+                    id: appointmentId,
+                    doctorId: doctor.id,
+                    status: 'pending'
+                },
+                raw: false
+            });
+
+            if (!appointment) {
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'Appointment not found or status is not pending'
+                });
+            }
+
+            appointment.status = 'confirmed';
+            await appointment.save();
+
+            return resolve({
+                errCode: 0,
+                message: 'Appointment confirmed successfully',
+                data: appointment
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+const completeExaminationService = (userId, data) => {
+    return new Promise(async (resolve, reject) => {
+        const transaction = await db.sequelize.transaction();
+
+        try {
+            const doctor = await db.Doctor.findOne({
+                where: { userId: userId }
+            });
+            if (!doctor) {
+                await transaction.rollback();
+                return resolve({ errCode: 2, errMessage: 'Doctor not found' });
+            }
+
+            const appointment = await db.Appointment.findOne({
+                where: {
+                    id: data.appointmentId,
+                    doctorId: doctor.id
+                },
+                raw: false
+            });
+
+            if (!appointment) {
+                await transaction.rollback();
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'Appointment not found'
+                });
+            }
+
+            if (appointment.status === 'completed') {
+                await transaction.rollback();
+                return resolve({
+                    errCode: 4,
+                    errMessage: 'Appointment already completed'
+                });
+            }
+
+            const newRecord = await db.Record.create(
+                {
+                    doctorId: doctor.id,
+                    patientId: appointment.patientId,
+                    serviceId: appointment.serviceId,
+                    appointmentId: appointment.id,
+                    examDate: new Date(),
+                    diagnosis: data.diagnosis,
+                    symptoms: data.symptoms,
+                    soapNotes: data.soapNotes,
+                    prescription: data.prescription,
+                    reExamDate: data.reExamDate
+                        ? new Date(data.reExamDate)
+                        : null
+                },
+                { transaction }
+            );
+
+            appointment.status = 'completed';
+            await appointment.save({ transaction });
+
+            await transaction.commit();
+
+            return resolve({
+                errCode: 0,
+                message: 'Examination completed and record saved',
+                data: newRecord
+            });
+        } catch (e) {
+            await transaction.rollback();
+            reject(e);
+        }
+    });
+};
+
 module.exports = {
     getAllDoctorsService,
     getDoctorByIdService,
     getSchedulesService,
     getSlotsService,
     getDoctorBySpecialtyService,
-    getAppointmentsService
+    getAppointmentsService,
+    confirmAppointmentService,
+    completeExaminationService
 };
