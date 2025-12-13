@@ -16,7 +16,7 @@ const processQueue = (error, token = null) => {
   failedQueue = []
 }
 
-export const api = axios.create({ baseURL })
+export const api = axios.create({ baseURL, timeout: 30000 })
 
 api.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem('accessToken')
@@ -68,4 +68,4 @@ api.interceptors.response.use(
   }
 )
 
-export const noAuthApi = axios.create({ baseURL })
+export const noAuthApi = axios.create({ baseURL, timeout: 30000 })

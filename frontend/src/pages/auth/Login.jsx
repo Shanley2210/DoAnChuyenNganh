@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { noAuthApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
+import { jwtDecode } from 'jwt-decode'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -26,8 +27,19 @@ export default function Login() {
         if (accessToken && refreshToken) {
           login(accessToken, refreshToken)
         }
-        const from = location.state?.from?.pathname || '/'
-        navigate(from)
+        const from = location.state?.from?.pathname
+        let target = '/patient'
+        try {
+          const decoded = jwtDecode(accessToken || '')
+          const roles = Array.isArray(decoded?.roles) ? decoded.roles : []
+          const isAdmin = roles.includes('System_Admin') || roles.includes('Hospital_Admin')
+          target = isAdmin ? '/admin' : '/patient'
+        } catch (_) { /* ignore decode errors */ }
+        if (from && !['/login','/register','/verify-otp'].includes(from)) {
+          navigate(from)
+        } else {
+          navigate(target)
+        }
       } else setMsg(data.errMessage || 'Đăng nhập thất bại')
     } catch (err) {
       setMsg('Lỗi kết nối')

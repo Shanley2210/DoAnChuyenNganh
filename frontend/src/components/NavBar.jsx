@@ -3,32 +3,61 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function NavBar() {
-  const { accessToken, logout } = useAuth()
+  const { user, accessToken, logout } = useAuth()
   const navigate = useNavigate()
   const onLogout = () => {
     logout()
-    navigate('/login')
+    navigate('/')
   }
+  const roles = Array.isArray(user?.roles) ? user.roles : []
+  const isAdmin = roles.includes('System_Admin') || roles.includes('Hospital_Admin')
+  const isDoctor = roles.includes('Doctor')
   return (
     <nav className="appbar">
       <div className="container" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <Link to="/">Home</Link>
-        <Link to="/specialties">Specialties</Link>
-        <Link to="/services">Services</Link>
-        <Link to="/doctor">Doctors</Link>
-        <Link to="/doctor/appointments">My Appointments</Link>
-        <Link to="/patient/profile">My Profile</Link>
-        <Link to="/patient/appointments/edit">Edit Appointment</Link>
-        <Link to="/patient/appointments/cancel">Cancel Appointment</Link>
-        <Link to="/admin/create-hospital-admin">Create Hospital Admin</Link>
-        <Link to="/admin/permissions">Permissions</Link>
+        {!accessToken && (
+          <>
+            <Link to="/">Trang chủ</Link>
+            <Link to="/specialties">Chuyên khoa</Link>
+            <Link to="/services">Dịch vụ</Link>
+            <Link to="/doctor">Bác sĩ</Link>
+          </>
+        )}
+        {accessToken && isAdmin && (
+          <>
+            <Link to="/admin/permissions">Phân quyền</Link>
+            <Link to="/admin/create-hospital-admin">Tạo admin</Link>
+            <Link to="/admin/users">Quản lý tài khoản</Link>
+          </>
+        )}
+        {accessToken && !isAdmin && isDoctor && (
+          <>
+            <Link to="/">Trang chủ</Link>
+            <Link to="/specialties">Chuyên khoa</Link>
+            <Link to="/services">Dịch vụ</Link>
+            <Link to="/doctor">Bác sĩ</Link>
+            <Link to="/doctor/appointments">Lịch hẹn của bác sĩ</Link>
+          </>
+        )}
+        {accessToken && !isAdmin && !isDoctor && (
+          <>
+            <Link to="/">Trang chủ</Link>
+            <Link to="/specialties">Chuyên khoa</Link>
+            <Link to="/services">Dịch vụ</Link>
+            <Link to="/doctor">Bác sĩ</Link>
+            <Link to="/patient/appointments">Hồ sơ bệnh nhân</Link>
+            <Link to="/patient/profile/create">Tạo hồ sơ bệnh nhân</Link>
+            <Link to="/patient/appointments/edit">Chỉnh sửa lịch hẹn</Link>
+            <Link to="/patient/appointments/cancel">Hủy lịch hẹn</Link>
+          </>
+        )}
         <div className="spacer" />
         {accessToken ? (
-          <button className="btn btn-primary" onClick={onLogout}>Logout</button>
+          <button className="btn btn-primary" onClick={onLogout}>Đăng xuất</button>
         ) : (
           <div style={{ display: 'flex', gap: 10 }}>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
+            <Link to="/login">Đăng nhập</Link>
+            <Link to="/register">Đăng ký</Link>
           </div>
         )}
       </div>

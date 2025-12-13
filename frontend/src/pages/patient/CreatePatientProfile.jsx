@@ -1,38 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { api } from '../../services/api'
 
-export default function Profile() {
-  const [profile, setProfile] = useState(null)
+export default function CreatePatientProfile() {
   const [form, setForm] = useState({ dob: '', gender: '', ethnicity: '', address: '', insuranceTerm: '', insuranceNumber: '', familyAddress: '', notePMH: '' })
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(false)
-  const [loadingLoad, setLoadingLoad] = useState(false)
-
-  const load = async () => {
-    setMsg('')
-    setLoadingLoad(true)
-    try {
-      const { data } = await api.get('/api/patient/profile')
-      if (data.errCode === 0) {
-        setProfile(data.data || null)
-        const p = data.data || {}
-        setForm({
-          dob: p.dob || '',
-          gender: p.gender?.toString?.() || '',
-          ethnicity: p.ethnicity || '',
-          address: p.address || '',
-          insuranceTerm: p.insuranceTerm || '',
-          insuranceNumber: p.insuranceNumber || '',
-          familyAddress: p.familyAddress || '',
-          notePMH: p.notePMH || ''
-        })
-      } else setMsg(data.errMessage || 'Lỗi')
-    } catch (e) {
-      setMsg('Lỗi kết nối hoặc không có quyền')
-    } finally { setLoadingLoad(false) }
-  }
-
-  useEffect(() => { load() }, [])
 
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -41,11 +13,9 @@ export default function Profile() {
     setMsg('')
     setLoading(true)
     try {
-      const { data } = await api.put('/api/patient/profile', form)
-      if (data.errCode === 0) {
-        setMsg('Cập nhật hồ sơ bệnh nhân thành công')
-        load()
-      } else setMsg(data.errMessage || 'Lỗi')
+      const { data } = await api.post('/api/patient/profile', form)
+      if (data.errCode === 0) setMsg('Tạo hồ sơ thành công')
+      else setMsg(data.errMessage || 'Lỗi')
     } catch (err) {
       setMsg('Lỗi kết nối hoặc không có quyền')
     } finally { setLoading(false) }
@@ -53,23 +23,9 @@ export default function Profile() {
 
   return (
     <div className="card" style={{ maxWidth: 720, margin: '24px auto' }}>
-      <h2>Hồ sơ bệnh nhân</h2>
-      <p className="text-muted" style={{ marginBottom: 12 }}>{loadingLoad ? 'Đang tải dữ liệu...' : 'Cập nhật thông tin của bạn'}</p>
+      <h2>Tạo hồ sơ bệnh nhân</h2>
+      <p className="text-muted" style={{ marginBottom: 12 }}>Nhập thông tin để tạo hồ sơ của bạn</p>
       {msg && <div className={`alert ${msg.includes('thành công') ? 'alert-success' : 'alert-error'}`}>{msg}</div>}
-      <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 12 }}>
-        <div>
-          <label>Họ và tên</label>
-          <input className="input" value={profile?.user?.name || ''} disabled />
-        </div>
-        <div>
-          <label>Email</label>
-          <input className="input" value={profile?.user?.email || ''} disabled />
-        </div>
-        <div style={{ gridColumn: '1 / -1' }}>
-          <label>Số điện thoại</label>
-          <input className="input" value={profile?.user?.phone || ''} disabled />
-        </div>
-      </div>
       <form onSubmit={onSubmit} className="form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
         <div>
           <label>Ngày sinh</label>
@@ -104,7 +60,7 @@ export default function Profile() {
           <input className="input" name="notePMH" placeholder="Ghi chú" value={form.notePMH} onChange={onChange} />
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <button className="btn btn-primary" type="submit" disabled={loading || loadingLoad}>{loading ? 'Đang lưu...' : 'Lưu'}</button>
+          <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Đang tạo...' : 'Tạo hồ sơ'}</button>
         </div>
       </form>
     </div>

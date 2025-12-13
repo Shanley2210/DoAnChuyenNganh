@@ -24,7 +24,7 @@ export default function VerifyOtp() {
         const refreshToken = data.refreshToken || data.tokens?.refreshToken
         if (accessToken && refreshToken) {
           login(accessToken, refreshToken)
-          navigate('/')
+          setTimeout(() => navigate('/'), 1500)
         }
       }
       else setMsg(data.errMessage || 'OTP không hợp lệ')

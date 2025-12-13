@@ -5,6 +5,6 @@ import { useAuth } from '../context/AuthContext'
 export default function ProtectedRoute({ children }) {
   const { accessToken } = useAuth()
   const location = useLocation()
-  if (!accessToken) return <Navigate to="/login" state={{ from: location }} replace />
+  if (!accessToken) return <Navigate to="/" state={{ from: location }} replace />
   return children
 }
