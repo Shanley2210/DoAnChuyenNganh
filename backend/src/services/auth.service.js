@@ -6,8 +6,21 @@ const { generateOTP } = require('../utils/generateOTP');
 const { where, Op } = require('sequelize');
 require('dotenv').config();
 
-const generateTokens = (user) => {
-    const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+const generateTokens = async (user) => {
+    // Fetch roles for the user to embed into access token payload
+    const userWithRoles = await db.User.findOne({
+        where: { id: user.id },
+        include: [
+            {
+                model: db.Role,
+                as: 'roles',
+                through: { attributes: [] }
+            }
+        ]
+    });
+    const roleNames = userWithRoles?.roles?.map((r) => r.name) || [];
+
+    const accessToken = jwt.sign({ id: user.id, roles: roleNames }, process.env.JWT_SECRET, {
         expiresIn: '1h'
     });
     const refreshToken = jwt.sign(
@@ -120,13 +133,21 @@ const registerService = (name, email, phone, password, confirmPassword) => {
                 }
             }
 
-            await sendOtpEmail(email, otp);
-
-            return resolve({
-                errCode: 0,
-                message:
-                    'Registration successful. Please check your email for OTP.'
-            });
+            try {
+                await sendOtpEmail(email, otp);
+                return resolve({
+                    errCode: 0,
+                    message: 'Registration successful. Please check your email for OTP.'
+                });
+            } catch (emailError) {
+                console.error('Failed to send OTP email:', emailError);
+                // Mặc dù gửi mail lỗi, vẫn trả về thành công để user có thể xác thực sau
+                // Hoặc bạn có thể trả về một mã lỗi khác để frontend xử lý
+                return resolve({
+                    errCode: 5, // Lỗi gửi mail
+                    errMessage: 'Tạo tài khoản thành công nhưng không thể gửi email OTP. Vui lòng thử lại chức năng "Gửi lại OTP".'
+                });
+            }
         } catch (e) {
             return reject(e);
         }
@@ -163,14 +184,14 @@ const verifyEmailService = (email, otp) => {
             user.otp = null;
             user.otpExpires = null;
 
-            const tokens = generateTokens(user);
+            const tokens = await generateTokens(user);
             user.refreshToken = tokens.refreshToken;
 
             await user.save();
             return resolve({
                 errCode: 0,
                 message: 'Email verified successfully',
-                tokens: tokens
+                tokens: await tokens
             });
         } catch (e) {
             return reject(e);
@@ -244,7 +265,7 @@ const loginService = (emailOrPhone, password) => {
                 });
             }
 
-            const tokens = generateTokens(user);
+            const tokens = await generateTokens(user);
             user.refreshToken = tokens.refreshToken;
             await user.save();
 
@@ -401,13 +422,21 @@ const refreshTokenService = (refreshToken) => {
 
                     const userId = decoded.id;
                     const user = await db.User.findOne({
-                        where: { id: userId, verify: true }
+                        where: { id: userId, verify: true },
+                        include: [
+                            {
+                                model: db.Role,
+                                as: 'roles',
+                                through: { attributes: [] }
+                            }
+                        ]
                     });
 
-                    const newTokens = jwt.sign(
+                    const roleNames = user?.roles?.map((r) => r.name) || [];
+                    const newAccessToken = jwt.sign(
                         {
                             id: user.id,
-                            role: user.role
+                            roles: roleNames
                         },
                         process.env.JWT_SECRET,
                         { expiresIn: '1h' }
@@ -416,7 +445,7 @@ const refreshTokenService = (refreshToken) => {
                     return resolve({
                         errCode: 0,
                         message: 'Token refreshed successfully.',
-                        accessToken: newTokens
+                        accessToken: newAccessToken
                     });
                 }
             );

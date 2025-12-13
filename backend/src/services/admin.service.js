@@ -73,6 +73,52 @@ const createHopistalAdminService = (
                 { transaction: trans }
             );
 
+            const defauRole = await db.Role.findOne({
+                where: { name: 'Hospital_Admin' },
+                transaction: trans
+            });
+
+            if (!defauRole) {
+                await trans.rollback();
+                return resolve({
+                    errCode: 4,
+                    errMessage: 'Hospital_Admin role not found'
+                });
+            }
+
+            await db.UserRole.create(
+                {
+                    userId: newUser.id,
+                    roleId: defauRole.id
+                },
+                { transaction: trans }
+            );
+
+            // Grant default permissions for Hospital Admin (account management and related)
+            const defaultPermissionNames = [
+                'user_manage_all',
+                'user_view_all',
+                'view_user_detail',
+                'doctor_manage',
+                'service_manage',
+                'doctor_schedule_manage'
+            ];
+
+            const permissions = await db.Permission.findAll({
+                where: { name: { [Op.in]: defaultPermissionNames } },
+                transaction: trans
+            });
+
+            if (permissions && permissions.length > 0) {
+                await db.UserPermission.bulkCreate(
+                    permissions.map((p) => ({
+                        userId: newUser.id,
+                        permissionId: p.id
+                    })),
+                    { transaction: trans }
+                );
+            }
+
             await trans.commit();
 
             return resolve({
@@ -391,14 +437,12 @@ const getUserByIdService = (userId) => {
                     {
                         model: db.Role,
                         as: 'roles',
-                        through: { attributes: [] },
-                        include: [
-                            {
-                                model: db.Permission,
-                                as: 'permissions',
-                                through: { attributes: [] }
-                            }
-                        ]
+                        through: { attributes: [] }
+                    },
+                    {
+                        model: db.Permission,
+                        as: 'permissions',
+                        through: { attributes: [] }
                     }
                 ]
             });

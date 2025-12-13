@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/auth.middleware');
 const uploadMiddleware = require('../middlewares/upload.middleware');
 
 router.post(
-    '/hopistal-admin',
+    '/hospital-admin',
     authMiddleware.verifyToken,
     authMiddleware.verifyRole('System_Admin'),
     authMiddleware.verifyPermission('system_management'),

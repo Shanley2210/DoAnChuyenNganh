@@ -1,12 +1,10 @@
 {
     "development": {
-        "username": "root",
-        "password": "123456",
-        "database": "booking",
+        "username": "root", 
+        "password": "",
+        "database": "hospital_db", 
         "host": "localhost",
-        "dialect": "mysql",
-        "logging": false,
-        "timezone": "+07:00"
+        "dialect": "mysql"
     },
     "test": {
         "username": "root",
