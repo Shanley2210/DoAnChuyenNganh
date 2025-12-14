@@ -13,10 +13,14 @@ import {
     CheckCircle,
     Upload,
     Clock,
-    AlertCircle
+    AlertCircle,
+    UserPlus,
+    UserCog
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
+import CreateHospitalAdmin from './CreateHospitalAdmin';
+import ManageUsers from './ManageUsers';
 
 const SHIFTS = [
     { key: 'C1', label: 'Ca Sáng', time: '08:00 - 12:00' },
@@ -399,6 +403,95 @@ const DoctorManager = ({ doctors, specialties, refreshData }) => {
                         </select>
                     </div>
                     <div className='col-span-2 md:col-span-1'>
+                        <label className='text-sm font-medium'>Ngày sinh</label>
+                        <input
+                            type='date'
+                            className='w-full border p-2 rounded'
+                            value={formData.dob}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    dob: e.target.value
+                                })
+                            }
+                            required={!editingDoc}
+                        />
+                    </div>
+                    <div className='col-span-2 md:col-span-1'>
+                        <label className='text-sm font-medium'>Giới tính</label>
+                        <select
+                            className='w-full border p-2 rounded'
+                            value={formData.gender}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    gender: e.target.value
+                                })
+                            }
+                            required={!editingDoc}
+                        >
+                            <option value='M'>Nam</option>
+                            <option value='F'>Nữ</option>
+                            <option value='O'>Khác</option>
+                        </select>
+                    </div>
+                    <div className='col-span-2 md:col-span-1'>
+                        <label className='text-sm font-medium'>Dân tộc</label>
+                        <input
+                            className='w-full border p-2 rounded'
+                            value={formData.ethnicity}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    ethnicity: e.target.value
+                                })
+                            }
+                            required={!editingDoc}
+                        />
+                    </div>
+                    <div className='col-span-2 md:col-span-1'>
+                        <label className='text-sm font-medium'>Địa chỉ</label>
+                        <input
+                            className='w-full border p-2 rounded'
+                            value={formData.address}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    address: e.target.value
+                                })
+                            }
+                            required={!editingDoc}
+                        />
+                    </div>
+                    <div className='col-span-2 md:col-span-1'>
+                        <label className='text-sm font-medium'>Học vị</label>
+                        <input
+                            className='w-full border p-2 rounded'
+                            value={formData.degree}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    degree: e.target.value
+                                })
+                            }
+                            required={!editingDoc}
+                        />
+                    </div>
+                    <div className='col-span-2 md:col-span-1'>
+                        <label className='text-sm font-medium'>Phòng</label>
+                        <input
+                            className='w-full border p-2 rounded'
+                            value={formData.room}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    room: e.target.value
+                                })
+                            }
+                            required={!editingDoc}
+                        />
+                    </div>
+                    <div className='col-span-2 md:col-span-1'>
                         <label className='text-sm font-medium'>Giá</label>
                         <input
                             type='number'
@@ -418,6 +511,8 @@ const DoctorManager = ({ doctors, specialties, refreshData }) => {
                             type='file'
                             onChange={handleImageChange}
                             className='w-full'
+                            accept='image/*'
+                            required={!editingDoc}
                         />
                     </div>
                     <div className='col-span-2 flex justify-end gap-2 pt-4'>
@@ -1211,7 +1306,9 @@ export default function AdminDashboard() {
             label: 'Quản lý Chuyên khoa',
             icon: BriefcaseMedical
         },
-        { id: 'services', label: 'Quản lý Dịch vụ', icon: Activity }
+        { id: 'services', label: 'Quản lý Dịch vụ', icon: Activity },
+        { id: 'create-hospital-admin', label: 'Tạo tài khoản Admin', icon: UserPlus },
+        { id: 'manage-users', label: 'Quản lý tài khoản user', icon: UserCog }
     ];
 
     const renderContent = () => {
@@ -1250,6 +1347,10 @@ export default function AdminDashboard() {
                         setServices={setServices}
                     />
                 );
+            case 'create-hospital-admin':
+                return <CreateHospitalAdmin />;
+            case 'manage-users':
+                return <ManageUsers />;
             default:
                 return (
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>

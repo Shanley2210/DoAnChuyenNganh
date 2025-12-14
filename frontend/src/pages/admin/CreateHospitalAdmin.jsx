@@ -22,35 +22,39 @@ export default function CreateHospitalAdmin() {
   }
 
   return (
-    <div className="card" style={{ maxWidth: 560, margin: '24px auto' }}>
-      <h2>Tạo quản trị viên bệnh viện</h2>
-      <p className="text-muted" style={{ marginBottom: 12 }}>Nhập thông tin người dùng và xác nhận mật khẩu.</p>
-      <form onSubmit={onSubmit} className="form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+    <div className='bg-white rounded-lg shadow p-6'>
+      <h2 className='text-xl font-bold text-gray-800'>Tạo quản trị viên bệnh viện</h2>
+      <p className='text-gray-500 mb-4'>Nhập thông tin người dùng và xác nhận mật khẩu.</p>
+      <form onSubmit={onSubmit} className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div>
-          <label>Tên</label>
-          <input className="input" name="name" placeholder="Tên" value={form.name} onChange={onChange} required />
-        </div>
-        <div>
-          <label>Email</label>
-          <input className="input" name="email" placeholder="Email" value={form.email} onChange={onChange} required />
+          <label className='text-sm font-medium'>Tên</label>
+          <input className='w-full border p-2 rounded bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500' name='name' placeholder='Tên' value={form.name} onChange={onChange} required />
         </div>
         <div>
-          <label>Số điện thoại</label>
-          <input className="input" name="phone" placeholder="Số điện thoại" value={form.phone} onChange={onChange} required />
+          <label className='text-sm font-medium'>Email</label>
+          <input className='w-full border p-2 rounded bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500' name='email' placeholder='Email' value={form.email} onChange={onChange} required />
         </div>
         <div>
-          <label>Mật khẩu</label>
-          <input className="input" type="password" name="password" placeholder="••••••" value={form.password} onChange={onChange} required />
+          <label className='text-sm font-medium'>Số điện thoại</label>
+          <input className='w-full border p-2 rounded bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500' name='phone' placeholder='Số điện thoại' value={form.phone} onChange={onChange} required />
         </div>
-        <div style={{ gridColumn: '1 / -1' }}>
-          <label>Xác nhận mật khẩu</label>
-          <input className="input" type="password" name="confirmPassword" placeholder="••••••" value={form.confirmPassword} onChange={onChange} required />
+        <div>
+          <label className='text-sm font-medium'>Mật khẩu</label>
+          <input className='w-full border p-2 rounded bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500' type='password' name='password' placeholder='••••••' value={form.password} onChange={onChange} required />
         </div>
-        <div style={{ gridColumn: '1 / -1' }}>
-          <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? 'Đang tạo...' : 'Tạo'}</button>
+        <div className='md:col-span-2'>
+          <label className='text-sm font-medium'>Xác nhận mật khẩu</label>
+          <input className='w-full border p-2 rounded bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500' type='password' name='confirmPassword' placeholder='••••••' value={form.confirmPassword} onChange={onChange} required />
+        </div>
+        <div className='md:col-span-2 flex justify-end'>
+          <button className='bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50' type='submit' disabled={loading}>{loading ? 'Đang tạo...' : 'Tạo'}</button>
         </div>
       </form>
-      {msg && <div className={`alert ${msg.includes('thành công') ? 'alert-success' : 'alert-error'}`}>{msg}</div>}
+      {msg && (
+        <div className={`mt-4 px-3 py-2 rounded border ${msg.includes('thành công') ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+          {msg}
+        </div>
+      )}
     </div>
   )
 }

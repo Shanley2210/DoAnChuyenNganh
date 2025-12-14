@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import dayjs from 'dayjs'
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
     const [profile, setProfile] = useState(null);
@@ -17,9 +18,9 @@ export default function Profile() {
     const [msg, setMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const [loadingLoad, setLoadingLoad] = useState(false);
+    const navigate = useNavigate();
 
     const load = async () => {
-        setMsg('');
         setLoadingLoad(true);
         try {
             const { data } = await api.get('/api/patient/profile');
@@ -169,7 +170,14 @@ export default function Profile() {
                     />
                 </div>
 
-                <div className='md:col-span-2 flex justify-end'>
+                <div className='md:col-span-2 flex justify-between items-center'>
+                    <button
+                        type='button'
+                        onClick={() => navigate('/Home')}
+                        className='rounded-lg border border-gray-300 px-6 py-2 text-gray-700 font-semibold text-sm hover:bg-gray-100 transition'
+                    >
+                        Quay lại
+                    </button>
                     <button
                         type='submit'
                         disabled={loading || loadingLoad}

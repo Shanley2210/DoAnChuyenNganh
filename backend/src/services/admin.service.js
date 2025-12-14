@@ -384,13 +384,18 @@ const getUsersService = () => {
     return new Promise(async (resolve, reject) => {
         try {
             const users = await db.User.findAll({
-                oder: [
-                    ['role', 'ASC'],
-                    ['name', 'ASC']
-                ],
+                order: [['id', 'ASC']],
                 attributes: {
                     exclude: ['password', 'otp', 'otpExpires', 'refreshToken']
-                }
+                },
+                include: [
+                    {
+                        model: db.Role,
+                        as: 'roles',
+                        attributes: ['id', 'name'],
+                        through: { attributes: [] }
+                    }
+                ]
             });
 
             return resolve({
@@ -428,20 +433,15 @@ const getUserByIdService = (userId) => {
                         }
                     },
                     {
-                        model: db.Receptionist,
-                        as: 'receptionist',
-                        attributes: {
-                            exclude: ['id', 'userId']
-                        }
-                    },
-                    {
                         model: db.Role,
                         as: 'roles',
+                        attributes: ['id', 'name'],
                         through: { attributes: [] }
                     },
                     {
                         model: db.Permission,
                         as: 'permissions',
+                        attributes: ['id', 'name'],
                         through: { attributes: [] }
                     }
                 ]
@@ -663,7 +663,7 @@ const createDoctorService = (data, imageFilename) => {
                 });
             }
 
-            await db.Doctor.create(
+            const newDoctor = await db.Doctor.create(
                 {
                     userId: newUser.id,
                     specialtyId: specialtyId,
@@ -683,7 +683,8 @@ const createDoctorService = (data, imageFilename) => {
 
             return resolve({
                 errCode: 0,
-                message: `Create doctor successful`
+                message: `Create doctor successful`,
+                data: { id: newDoctor.id }
             });
         } catch (e) {
             await trans.rollback();

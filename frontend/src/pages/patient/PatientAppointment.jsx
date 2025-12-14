@@ -10,6 +10,7 @@ import {
     Activity,
     MapPin
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 
 // --- UTILS ---
@@ -78,6 +79,7 @@ const getStatusConfig = (status) => {
 const PatientAppointment = () => {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -116,7 +118,10 @@ const PatientAppointment = () => {
             {/* Header */}
             <div className='bg-white shadow-sm border-b sticky top-0 z-10'>
                 <div className='container mx-auto px-4 h-16 flex items-center gap-3'>
-                    <button className='p-2 hover:bg-gray-100 rounded-full text-gray-600'>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className='p-2 hover:bg-gray-100 rounded-full text-gray-600'
+                    >
                         <ChevronLeft size={24} />
                     </button>
                     <h1 className='text-xl font-bold text-gray-800'>

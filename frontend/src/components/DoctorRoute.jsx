@@ -8,7 +8,7 @@ export default function DoctorRoute({ children }) {
     const location = useLocation();
 
     if (!accessToken) {
-        return <Navigate to='/login' state={{ from: location }} replace />;
+        return <Navigate to='/' state={{ from: location }} replace />;
     }
 
     let roles = [];
@@ -16,7 +16,7 @@ export default function DoctorRoute({ children }) {
         const decoded = jwtDecode(accessToken);
         roles = Array.isArray(decoded?.roles) ? decoded.roles : [];
     } catch {
-        return <Navigate to='/login' replace />;
+        return <Navigate to='/' replace />;
     }
 
     const isDoctor = roles.includes('Doctor');
